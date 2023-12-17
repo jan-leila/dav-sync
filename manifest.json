@@ -1,10 +1,10 @@
 {
-  "id": "remotely-save",
-  "name": "Remotely Save",
-  "version": "0.3.25",
+  "id": "dav-sync",
+  "name": "dav-sync",
+  "version": "0.0.0",
   "minAppVersion": "0.13.21",
-  "description": "Yet another unofficial plugin allowing users to synchronize notes between local device and the cloud service.",
-  "author": "fyears",
-  "authorUrl": "https://github.com/fyears",
+  "description": "Unofficial plugin allowing users to synchronize notes between local device and a cloud service using webDAV",
+  "author": "jan-leila",
+  "authorUrl": "https://github.com/jan-leila",
   "isDesktopOnly": false
 }

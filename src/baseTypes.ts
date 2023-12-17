@@ -3,17 +3,17 @@
  * To avoid circular dependency.
  */
 
-import { Platform, requireApiVersion } from "obsidian";
-import type { LangTypeAndAuto } from "./i18n";
+import { Platform, requireApiVersion } from 'obsidian'
+import type { LangTypeAndAuto } from './i18n'
 
-export const DEFAULT_CONTENT_TYPE = "application/octet-stream";
+export const DEFAULT_CONTENT_TYPE = 'application/octet-stream'
 
-export type SUPPORTED_SERVICES_TYPE = "s3" | "webdav" | "dropbox" | "onedrive";
+export type SUPPORTED_SERVICES_TYPE = 's3' | 'webdav' | 'dropbox' | 'onedrive';
 
 export type SUPPORTED_SERVICES_TYPE_WITH_REMOTE_BASE_DIR =
-  | "webdav"
-  | "dropbox"
-  | "onedrive";
+  | 'webdav'
+  | 'dropbox'
+  | 'onedrive';
 
 export interface S3Config {
   s3Endpoint: string;
@@ -38,13 +38,13 @@ export interface DropboxConfig {
   remoteBaseDir?: string;
 }
 
-export type WebdavAuthType = "digest" | "basic";
+export type WebdavAuthType = 'digest' | 'basic';
 export type WebdavDepthType =
-  | "auto_unknown"
-  | "auto_1"
-  | "auto_infinity"
-  | "manual_1"
-  | "manual_infinity";
+  | 'auto_unknown'
+  | 'auto_1'
+  | 'auto_infinity'
+  | 'manual_1'
+  | 'manual_infinity';
 
 export interface WebdavConfig {
   address: string;
@@ -101,10 +101,10 @@ export interface RemoteItem {
   etag?: string;
 }
 
-export const COMMAND_URI = "remotely-save";
-export const COMMAND_CALLBACK = "remotely-save-cb";
-export const COMMAND_CALLBACK_ONEDRIVE = "remotely-save-cb-onedrive";
-export const COMMAND_CALLBACK_DROPBOX = "remotely-save-cb-dropbox";
+export const COMMAND_URI = 'remotely-save'
+export const COMMAND_CALLBACK = 'remotely-save-cb'
+export const COMMAND_CALLBACK_ONEDRIVE = 'remotely-save-cb-onedrive'
+export const COMMAND_CALLBACK_DROPBOX = 'remotely-save-cb-dropbox'
 
 export interface UriParams {
   func?: string;
@@ -114,28 +114,28 @@ export interface UriParams {
 }
 
 // 80 days
-export const OAUTH2_FORCE_EXPIRE_MILLISECONDS = 1000 * 60 * 60 * 24 * 80;
+export const OAUTH2_FORCE_EXPIRE_MILLISECONDS = 1000 * 60 * 60 * 24 * 80
 
 type DecisionTypeForFile =
-  | "skipUploading" // special, modifiedTimeLocal === modifiedTimeRemote
-  | "uploadLocalDelHistToRemote" // "delLocalIfExists && delRemoteIfExists && cleanLocalDelHist && uploadLocalDelHistToRemote"
-  | "keepRemoteDelHist" // "delLocalIfExists && delRemoteIfExists && cleanLocalDelHist && keepRemoteDelHist"
-  | "uploadLocalToRemote" // "skipLocal && uploadLocalToRemote && cleanLocalDelHist && cleanRemoteDelHist"
-  | "downloadRemoteToLocal"; // "downloadRemoteToLocal && skipRemote && cleanLocalDelHist && cleanRemoteDelHist"
+  | 'skipUploading' // special, modifiedTimeLocal === modifiedTimeRemote
+  | 'uploadLocalDelHistToRemote' // "delLocalIfExists && delRemoteIfExists && cleanLocalDelHist && uploadLocalDelHistToRemote"
+  | 'keepRemoteDelHist' // "delLocalIfExists && delRemoteIfExists && cleanLocalDelHist && keepRemoteDelHist"
+  | 'uploadLocalToRemote' // "skipLocal && uploadLocalToRemote && cleanLocalDelHist && cleanRemoteDelHist"
+  | 'downloadRemoteToLocal'; // "downloadRemoteToLocal && skipRemote && cleanLocalDelHist && cleanRemoteDelHist"
 
 type DecisionTypeForFileSize =
-  | "skipUploadingTooLarge"
-  | "skipDownloadingTooLarge"
-  | "skipUsingLocalDelTooLarge"
-  | "skipUsingRemoteDelTooLarge"
-  | "errorLocalTooLargeConflictRemote"
-  | "errorRemoteTooLargeConflictLocal";
+  | 'skipUploadingTooLarge'
+  | 'skipDownloadingTooLarge'
+  | 'skipUsingLocalDelTooLarge'
+  | 'skipUsingRemoteDelTooLarge'
+  | 'errorLocalTooLargeConflictRemote'
+  | 'errorRemoteTooLargeConflictLocal';
 
 type DecisionTypeForFolder =
-  | "createFolder"
-  | "uploadLocalDelHistToRemoteFolder"
-  | "keepRemoteDelHistFolder"
-  | "skipFolder";
+  | 'createFolder'
+  | 'uploadLocalDelHistToRemoteFolder'
+  | 'keepRemoteDelHistFolder'
+  | 'skipFolder';
 
 export type DecisionType =
   | DecisionTypeForFile
@@ -158,7 +158,7 @@ export interface FileOrFolderMixedState {
   changeLocalMtimeUsingMapping?: boolean;
   decision?: DecisionType;
   decisionBranch?: number;
-  syncDone?: "done";
+  syncDone?: 'done';
   remoteEncryptedKey?: string;
 
   modifiedTimeLocalFmt?: string;
@@ -167,17 +167,17 @@ export interface FileOrFolderMixedState {
   deleteTimeRemoteFmt?: string;
 }
 
-export const API_VER_STAT_FOLDER = "0.13.27";
-export const API_VER_REQ_URL = "0.13.26"; // desktop ver 0.13.26, iOS ver 1.1.1
-export const API_VER_REQ_URL_ANDROID = "0.14.6"; // Android ver 1.2.1
+export const API_VER_STAT_FOLDER = '0.13.27'
+export const API_VER_REQ_URL = '0.13.26' // desktop ver 0.13.26, iOS ver 1.1.1
+export const API_VER_REQ_URL_ANDROID = '0.14.6' // Android ver 1.2.1
 
 export const VALID_REQ_URL =
   (!Platform.isAndroidApp && requireApiVersion(API_VER_REQ_URL)) ||
-  (Platform.isAndroidApp && requireApiVersion(API_VER_REQ_URL_ANDROID));
+  (Platform.isAndroidApp && requireApiVersion(API_VER_REQ_URL_ANDROID))
 
-export const DEFAULT_DEBUG_FOLDER = "_debug_remotely_save/";
+export const DEFAULT_DEBUG_FOLDER = '_debug_remotely_save/'
 export const DEFAULT_SYNC_PLANS_HISTORY_FILE_PREFIX =
-  "sync_plans_hist_exported_on_";
-export const DEFAULT_LOG_HISTORY_FILE_PREFIX = "log_hist_exported_on_";
+  'sync_plans_hist_exported_on_'
+export const DEFAULT_LOG_HISTORY_FILE_PREFIX = 'log_hist_exported_on_'
 
-export type SyncTriggerSourceType = "manual" | "auto" | "dry" | "autoOnceInit";
+export type SyncTriggerSourceType = 'manual' | 'auto' | 'dry' | 'autoOnceInit';

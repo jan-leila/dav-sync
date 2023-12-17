@@ -15,6 +15,3 @@ data.json
 
 # debug
 logs.txt
-
-# hidden files
-.*

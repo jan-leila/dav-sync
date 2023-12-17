@@ -9,7 +9,8 @@
     "dev": "webpack --mode development --watch",
     "format": "npx prettier --trailing-comma es5 --write .",
     "clean": "npx rimraf main.js",
-    "test": "cross-env TS_NODE_COMPILER_OPTIONS={\\\"module\\\":\\\"commonjs\\\"} mocha -r ts-node/register 'tests/**/*.ts'"
+    "test": "cross-env TS_NODE_COMPILER_OPTIONS={\\\"module\\\":\\\"commonjs\\\"} mocha -r ts-node/register 'tests/**/*.ts'",
+    "lint": "eslint --fix --ext .ts"
   },
   "browser": {
     "path": "path-browserify",
@@ -33,12 +34,15 @@
     "@types/mustache": "^4.2.5",
     "@types/node": "^20.10.4",
     "@types/qrcode": "^1.5.5",
+    "@typescript-eslint/eslint-plugin": "^6.14.0",
+    "@typescript-eslint/parser": "^6.14.0",
     "builtin-modules": "^3.3.0",
     "chai": "^4.3.10",
     "chai-as-promised": "^7.1.1",
     "cross-env": "^7.0.3",
     "dotenv": "^16.3.1",
     "esbuild": "^0.19.9",
+    "eslint": "^8.56.0",
     "jsdom": "^23.0.1",
     "mocha": "^10.2.0",
     "npm-check-updates": "^16.14.12",

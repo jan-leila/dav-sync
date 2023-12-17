@@ -1,17 +1,16 @@
 import isEqual from "lodash/isEqual";
 import { base64url } from "rfc4648";
 import { reverseString } from "./misc";
-import { log } from "./moreOnLog";
 
-const DEFAULT_README_FOR_METADATAONREMOTE =
+const DEFAULT_README_FOR_METADATA_ON_REMOTE =
   "Do NOT edit or delete the file manually. This file is for the plugin remotely-save to store some necessary meta data on the remote services. Its content is slightly obfuscated.";
 
-const DEFAULT_VERSION_FOR_METADATAONREMOTE = "20220220";
+const DEFAULT_VERSION_FOR_METADATA_ON_REMOTE = "20220220";
 
-export const DEFAULT_FILE_NAME_FOR_METADATAONREMOTE =
+export const DEFAULT_FILE_NAME_FOR_METADATA_ON_REMOTE =
   "_remotely-save-metadata-on-remote.json";
 
-export const DEFAULT_FILE_NAME_FOR_METADATAONREMOTE2 =
+export const DEFAULT_FILE_NAME_FOR_METADATA_ON_REMOTE2 =
   "_remotely-save-metadata-on-remote.bin";
 
 export interface DeletionOnRemote {
@@ -42,7 +41,7 @@ export const serializeMetadataOnRemote = (x: MetadataOnRemote) => {
   const y = x;
 
   if (y["version"] === undefined) {
-    y["version"] === DEFAULT_VERSION_FOR_METADATAONREMOTE;
+    y["version"] === DEFAULT_VERSION_FOR_METADATA_ON_REMOTE;
   }
   if (y["generatedWhen"] === undefined) {
     y["generatedWhen"] = Date.now();
@@ -52,7 +51,7 @@ export const serializeMetadataOnRemote = (x: MetadataOnRemote) => {
   }
 
   const z = {
-    readme: DEFAULT_README_FOR_METADATAONREMOTE,
+    readme: DEFAULT_README_FOR_METADATA_ON_REMOTE,
     d: reverseString(
       base64url.stringify(Buffer.from(JSON.stringify(x), "utf-8"), {
         pad: false,

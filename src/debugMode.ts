@@ -1,11 +1,11 @@
-import { TAbstractFile, TFolder, TFile, Vault } from "obsidian";
+import { Vault } from "obsidian";
 
 import type { SyncPlanType } from "./sync";
 import {
   readAllSyncPlanRecordTextsByVault,
   readAllLogRecordTextsByVault,
-} from "./localdb";
-import type { InternalDBs } from "./localdb";
+} from "./localDB";
+import type { InternalDBs } from "./localDB";
 import { mkdirpInVault } from "./misc";
 import {
   DEFAULT_DEBUG_FOLDER,
@@ -18,7 +18,7 @@ import { log } from "./moreOnLog";
 
 const turnSyncPlanToTable = (record: string) => {
   const syncPlan: SyncPlanType = JSON.parse(record);
-  const { ts, tsFmt, remoteType, mixedStates } = syncPlan;
+  const { ts, tsFmt, remoteType } = syncPlan;
 
   type allowedHeadersType = keyof FileOrFolderMixedState;
   const headers: allowedHeadersType[] = [
@@ -27,14 +27,14 @@ const turnSyncPlanToTable = (record: string) => {
     "existLocal",
     "sizeLocal",
     "sizeLocalEnc",
-    "mtimeLocal",
-    "deltimeLocal",
+    "modifiedTimeLocal",
+    "deleteTimeLocal",
     "changeLocalMtimeUsingMapping",
     "existRemote",
     "sizeRemote",
     "sizeRemoteEnc",
-    "mtimeRemote",
-    "deltimeRemote",
+    "modifiedTimeRemote",
+    "deleteTimeRemote",
     "changeRemoteMtimeUsingMapping",
     "decision",
     "decisionBranch",
@@ -57,10 +57,10 @@ const turnSyncPlanToTable = (record: string) => {
         continue;
       }
       if (
-        h === "mtimeLocal" ||
-        h === "deltimeLocal" ||
-        h === "mtimeRemote" ||
-        h === "deltimeRemote"
+        h === "modifiedTimeLocal" ||
+        h === "deleteTimeLocal" ||
+        h === "modifiedTimeRemote" ||
+        h === "deleteTimeRemote"
       ) {
         const fmt = v[(h + "Fmt") as allowedHeadersType] as string;
         const s = `${field}${fmt !== undefined ? " / " + fmt : ""}`;

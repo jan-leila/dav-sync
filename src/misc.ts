@@ -1,7 +1,7 @@
 import { Vault } from "obsidian";
 import * as path from "path";
 
-import { base32, base64url } from "rfc4648";
+import { base32 } from "rfc4648";
 import XRegExp from "xregexp";
 import emojiRegex from "emoji-regex";
 
@@ -156,7 +156,7 @@ export const base64ToBase64url = (a: string, pad: boolean = false) => {
  * so we need to write the regrex in a form that \p{C} minus \p{Cs}
  * @param a
  */
-export const isVaildText = (a: string) => {
+export const isValidText = (a: string) => {
   // If the regex matches, the string is invalid.
   return !XRegExp("\\p{Cc}|\\p{Cf}|\\p{Co}|\\p{Cn}|\\p{Zl}|\\p{Zp}", "A").test(
     a

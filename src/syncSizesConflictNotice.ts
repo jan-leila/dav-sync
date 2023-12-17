@@ -30,10 +30,10 @@ export class SizesConflictModal extends Modal {
     };
 
     contentEl.createEl("h2", {
-      text: t("modal_sizesconflict_title"),
+      text: t("modal_sizes_conflict_title"),
     });
 
-    t("modal_sizesconflict_desc", {
+    t("modal_sizes_conflict_desc", {
       thresholdMB: `${this.skipSizeLargerThan / 1000 / 1000}`,
       thresholdBytes: `${this.skipSizeLargerThan}`,
     })
@@ -47,12 +47,12 @@ export class SizesConflictModal extends Modal {
     contentEl.createDiv().createEl(
       "button",
       {
-        text: t("modal_sizesconflict_copybutton"),
+        text: t("modal_sizes_conflict_copy_button"),
       },
       (el) => {
         el.onclick = async () => {
           await navigator.clipboard.writeText(info);
-          new Notice(t("modal_sizesconflict_copynotice"));
+          new Notice(t("modal_sizes_conflict_copy_notice"));
         };
       }
     );

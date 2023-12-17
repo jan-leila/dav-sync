@@ -26,7 +26,7 @@ const DEFAULT_SETTINGS: RemotelySavePluginSettings = {
 };
 
 describe("Config Persist tests", () => {
-  it("should encrypt go back and forth conrrectly", async () => {
+  it("should encrypt go back and forth correctly", async () => {
     const k = DEFAULT_SETTINGS;
     const k2 = normalConfigToMessy(k);
     const k3 = messyConfigToNormal(k2);

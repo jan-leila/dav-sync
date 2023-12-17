@@ -10,11 +10,10 @@ import {
 import type { TextComponent } from "obsidian";
 import { createElement, Eye, EyeOff } from "lucide";
 import {
-  API_VER_REQURL,
   DEFAULT_DEBUG_FOLDER,
   SUPPORTED_SERVICES_TYPE,
   SUPPORTED_SERVICES_TYPE_WITH_REMOTE_BASE_DIR,
-  VALID_REQURL,
+  VALID_REQ_URL,
   WebdavAuthType,
   WebdavDepthType,
 } from "./baseTypes";
@@ -30,14 +29,14 @@ import {
   clearAllLoggerOutputRecords,
   insertLoggerOutputByVault,
   clearExpiredLoggerOutputRecords,
-} from "./localdb";
+} from "./localDB";
 import type RemotelySavePlugin from "./main"; // unavoidable
 import { RemoteClient } from "./remote";
 import {
   DEFAULT_DROPBOX_CONFIG,
   getAuthUrlAndVerifier as getAuthUrlAndVerifierDropbox,
   sendAuthReq as sendAuthReqDropbox,
-  setConfigBySuccessfullAuthInplace,
+  setConfigBySuccessfulAuthInPlace,
 } from "./remoteForDropbox";
 import {
   DEFAULT_ONEDRIVE_CONFIG,
@@ -46,12 +45,12 @@ import {
 import { messyConfigToNormal } from "./configPersist";
 import type { TransItemType } from "./i18n";
 import { checkHasSpecialCharForDir } from "./misc";
-import { applyWebdavPresetRulesInplace } from "./presetRules";
+import { applyWebdavPresetRulesInPlace } from "./presetRules";
 
 import {
-  applyLogWriterInplace,
+  applyLogWriterInPlace,
   log,
-  restoreLogWritterInplace,
+  restoreLogWriterInPlace,
 } from "./moreOnLog";
 
 class PasswordModal extends Modal {
@@ -72,7 +71,7 @@ class PasswordModal extends Modal {
 
     // contentEl.setText("Add Or change password.");
     contentEl.createEl("h2", { text: t("modal_password_title") });
-    t("modal_password_shortdesc")
+    t("modal_password_short_desc")
       .split("\n")
       .forEach((val, idx) => {
         contentEl.createEl("p", {
@@ -101,7 +100,7 @@ class PasswordModal extends Modal {
 
     new Setting(contentEl)
       .addButton((button) => {
-        button.setButtonText(t("modal_password_secondconfirm"));
+        button.setButtonText(t("modal_password_second_confirm"));
         button.onClick(async () => {
           this.plugin.settings.password = this.newPassword;
           await this.plugin.saveSettings();
@@ -111,7 +110,7 @@ class PasswordModal extends Modal {
         button.setClass("password-second-confirm");
       })
       .addButton((button) => {
-        button.setButtonText(t("goback"));
+        button.setButtonText(t("go_back"));
         button.onClick(() => {
           this.close();
         });
@@ -147,8 +146,8 @@ class ChangeRemoteBaseDirModal extends Modal {
       return this.plugin.i18n.t(x, vars);
     };
 
-    contentEl.createEl("h2", { text: t("modal_remotebasedir_title") });
-    t("modal_remotebasedir_shortdesc")
+    contentEl.createEl("h2", { text: t("modal_remote_base_dir_title") });
+    t("modal_remote_base_dir_short_desc")
       .split("\n")
       .forEach((val, idx) => {
         contentEl.createEl("p", {
@@ -163,29 +162,29 @@ class ChangeRemoteBaseDirModal extends Modal {
       new Setting(contentEl)
         .addButton((button) => {
           button.setButtonText(
-            t("modal_remotebasedir_secondconfirm_vaultname")
+            t("modal_remote_base_dir_second_confirm_vault_name")
           );
           button.onClick(async () => {
             // in the settings, the value is reset to the special case ""
             this.plugin.settings[this.service].remoteBaseDir = "";
             await this.plugin.saveSettings();
-            new Notice(t("modal_remotebasedir_notice"));
+            new Notice(t("modal_remote_base_dir_notice"));
             this.close();
           });
-          button.setClass("remotebasedir-second-confirm");
+          button.setClass("remote-base-dir-second-confirm");
         })
         .addButton((button) => {
-          button.setButtonText(t("goback"));
+          button.setButtonText(t("go_back"));
           button.onClick(() => {
             this.close();
           });
         });
     } else if (checkHasSpecialCharForDir(this.newRemoteBaseDir)) {
       contentEl.createEl("p", {
-        text: t("modal_remotebasedir_invaliddirhint"),
+        text: t("modal_remote_base_dir_invalid_dir_hint"),
       });
       new Setting(contentEl).addButton((button) => {
-        button.setButtonText(t("goback"));
+        button.setButtonText(t("go_back"));
         button.onClick(() => {
           this.close();
         });
@@ -193,18 +192,18 @@ class ChangeRemoteBaseDirModal extends Modal {
     } else {
       new Setting(contentEl)
         .addButton((button) => {
-          button.setButtonText(t("modal_remotebasedir_secondconfirm_change"));
+          button.setButtonText(t("modal_remote_base_dir_second_confirm_change"));
           button.onClick(async () => {
             this.plugin.settings[this.service].remoteBaseDir =
               this.newRemoteBaseDir;
             await this.plugin.saveSettings();
-            new Notice(t("modal_remotebasedir_notice"));
+            new Notice(t("modal_remote_base_dir_notice"));
             this.close();
           });
-          button.setClass("remotebasedir-second-confirm");
+          button.setClass("remote-base-dir-second-confirm");
         })
         .addButton((button) => {
-          button.setButtonText(t("goback"));
+          button.setButtonText(t("go_back"));
           button.onClick(() => {
             this.close();
           });
@@ -244,7 +243,7 @@ class DropboxAuthModal extends Modal {
       return this.plugin.i18n.t(x, vars);
     };
 
-    let needManualPatse = false;
+    let needManualPaste = false;
     const userAgent = window.navigator.userAgent.toLocaleLowerCase() || "";
     // some users report that,
     // the Linux would open another instance Obsidian if jumping back,
@@ -258,16 +257,16 @@ class DropboxAuthModal extends Modal {
         /fedora/.test(userAgent) ||
         /centos/.test(userAgent))
     ) {
-      needManualPatse = true;
+      needManualPaste = true;
     }
 
     const { authUrl, verifier } = await getAuthUrlAndVerifierDropbox(
       this.plugin.settings.dropbox.clientID,
-      needManualPatse
+      needManualPaste
     );
 
-    if (needManualPatse) {
-      t("modal_dropboxauth_manualsteps")
+    if (needManualPaste) {
+      t("modal_dropbox_auth_manual_steps")
         .split("\n")
         .forEach((val) => {
           contentEl.createEl("p", {
@@ -277,7 +276,7 @@ class DropboxAuthModal extends Modal {
     } else {
       this.plugin.oauth2Info.verifier = verifier;
 
-      t("modal_dropboxauth_autosteps")
+      t("modal_dropbox_auth_auto_steps")
         .split("\n")
         .forEach((val) => {
           contentEl.createEl("p", {
@@ -290,12 +289,12 @@ class DropboxAuthModal extends Modal {
     div2.createEl(
       "button",
       {
-        text: t("modal_dropboxauth_copybutton"),
+        text: t("modal_dropbox_auth_copy_button"),
       },
       (el) => {
         el.onclick = async () => {
           await navigator.clipboard.writeText(authUrl);
-          new Notice(t("modal_dropboxauth_copynotice"));
+          new Notice(t("modal_dropbox_auth_copy_notice"));
         };
       }
     );
@@ -305,11 +304,11 @@ class DropboxAuthModal extends Modal {
       text: authUrl,
     });
 
-    if (needManualPatse) {
+    if (needManualPaste) {
       let authCode = "";
       new Setting(contentEl)
-        .setName(t("modal_dropboxauth_maualinput"))
-        .setDesc(t("modal_dropboxauth_maualinput_desc"))
+        .setName(t("modal_dropbox_auth_manual_input"))
+        .setDesc(t("modal_dropbox_auth_manual_input_desc"))
         .addText((text) =>
           text
             .setPlaceholder("")
@@ -321,7 +320,7 @@ class DropboxAuthModal extends Modal {
         .addButton(async (button) => {
           button.setButtonText(t("submit"));
           button.onClick(async () => {
-            new Notice(t("modal_dropboxauth_maualinput_notice"));
+            new Notice(t("modal_dropbox_auth_manual_input_notice"));
             try {
               const authRes = await sendAuthReqDropbox(
                 this.plugin.settings.dropbox.clientID,
@@ -329,7 +328,7 @@ class DropboxAuthModal extends Modal {
                 authCode
               );
               const self = this;
-              setConfigBySuccessfullAuthInplace(
+              setConfigBySuccessfulAuthInPlace(
                 this.plugin.settings.dropbox,
                 authRes,
                 () => self.plugin.saveSettings()
@@ -347,7 +346,7 @@ class DropboxAuthModal extends Modal {
               this.plugin.settings.dropbox.username = username;
               await this.plugin.saveSettings();
               new Notice(
-                t("modal_dropboxauth_maualinput_conn_succ", {
+                t("modal_dropbox_auth_manual_input_conn_success", {
                   username: username,
                 })
               );
@@ -360,14 +359,14 @@ class DropboxAuthModal extends Modal {
                 this.plugin.settings.dropbox.username === ""
               );
               this.revokeAuthSetting.setDesc(
-                t("modal_dropboxauth_maualinput_conn_succ_revoke", {
+                t("modal_dropbox_auth_manual_input_conn_success_revoke", {
                   username: this.plugin.settings.dropbox.username,
                 })
               );
               this.close();
             } catch (err) {
               console.error(err);
-              new Notice(t("modal_dropboxauth_maualinput_conn_fail"));
+              new Notice(t("modal_dropbox_auth_manual_input_conn_fail"));
             }
           });
         });
@@ -412,7 +411,7 @@ export class OnedriveAuthModal extends Modal {
       return this.plugin.i18n.t(x, vars);
     };
 
-    t("modal_onedriveauth_shortdesc")
+    t("modal_onedrive_auth_short_desc")
       .split("\n")
       .forEach((val) => {
         contentEl.createEl("p", {
@@ -423,12 +422,12 @@ export class OnedriveAuthModal extends Modal {
     div2.createEl(
       "button",
       {
-        text: t("modal_onedriveauth_copybutton"),
+        text: t("modal_onedrive_auth_copy_button"),
       },
       (el) => {
         el.onclick = async () => {
           await navigator.clipboard.writeText(authUrl);
-          new Notice(t("modal_onedriveauth_copynotice"));
+          new Notice(t("modal_onedrive_auth_copy_notice"));
         };
       }
     );
@@ -468,7 +467,7 @@ export class OnedriveRevokeAuthModal extends Modal {
     };
 
     contentEl.createEl("p", {
-      text: t("modal_onedriverevokeauth_step1"),
+      text: t("modal_onedrive_revoke_auth_step_1"),
     });
     const consentUrl = "https://microsoft.com/consent";
     contentEl.createEl("p").createEl("a", {
@@ -477,14 +476,14 @@ export class OnedriveRevokeAuthModal extends Modal {
     });
 
     contentEl.createEl("p", {
-      text: t("modal_onedriverevokeauth_step2"),
+      text: t("modal_onedrive_revoke_auth_step2"),
     });
 
     new Setting(contentEl)
-      .setName(t("modal_onedriverevokeauth_clean"))
-      .setDesc(t("modal_onedriverevokeauth_clean_desc"))
+      .setName(t("modal_onedrive_revoke_auth_clean"))
+      .setDesc(t("modal_onedrive_revoke_auth_clean_desc"))
       .addButton(async (button) => {
-        button.setButtonText(t("modal_onedriverevokeauth_clean_button"));
+        button.setButtonText(t("modal_onedrive_revoke_auth_clean_button"));
         button.onClick(async () => {
           try {
             this.plugin.settings.onedrive = JSON.parse(
@@ -499,11 +498,11 @@ export class OnedriveRevokeAuthModal extends Modal {
               "onedrive-revoke-auth-button-hide",
               this.plugin.settings.onedrive.username === ""
             );
-            new Notice(t("modal_onedriverevokeauth_clean_notice"));
+            new Notice(t("modal_onedrive_revoke_auth_clean_notice"));
             this.close();
           } catch (err) {
             console.error(err);
-            new Notice(t("modal_onedriverevokeauth_clean_fail"));
+            new Notice(t("modal_onedrive_revoke_auth_clean_fail"));
           }
         });
       });
@@ -535,7 +534,7 @@ class SyncConfigDirModal extends Modal {
       return this.plugin.i18n.t(x, vars);
     };
 
-    t("modal_syncconfig_attn")
+    t("modal_sync_config_attn")
       .split("\n")
       .forEach((val) => {
         contentEl.createEl("p", {
@@ -545,17 +544,17 @@ class SyncConfigDirModal extends Modal {
 
     new Setting(contentEl)
       .addButton((button) => {
-        button.setButtonText(t("modal_syncconfig_secondconfirm"));
+        button.setButtonText(t("modal_sync_config_second_confirm"));
         button.onClick(async () => {
           this.plugin.settings.syncConfigDir = true;
           await this.plugin.saveSettings();
           this.saveDropdownFunc();
-          new Notice(t("modal_syncconfig_notice"));
+          new Notice(t("modal_sync_config_notice"));
           this.close();
         });
       })
       .addButton((button) => {
-        button.setButtonText(t("goback"));
+        button.setButtonText(t("go_back"));
         button.onClick(() => {
           this.close();
         });
@@ -589,7 +588,7 @@ class ExportSettingsQrCodeModal extends Modal {
     );
 
     const div1 = contentEl.createDiv();
-    t("modal_qr_shortdesc")
+    t("modal_qr_short_desc")
       .split("\n")
       .forEach((val) => {
         div1.createEl("p", {
@@ -680,7 +679,7 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
 
     // we need to create the div in advance of any other service divs
     const serviceChooserDiv = containerEl.createDiv();
-    serviceChooserDiv.createEl("h2", { text: t("settings_chooseservice") });
+    serviceChooserDiv.createEl("h2", { text: t("settings_choose_service") });
 
     //////////////////////////////////////////////////
     // below for s3
@@ -702,7 +701,7 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
       });
     }
 
-    if (!VALID_REQURL) {
+    if (!VALID_REQ_URL) {
       s3LongDescDiv.createEl("p", {
         text: t("settings_s3_cors"),
       });
@@ -724,7 +723,7 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
       text: t("settings_s3_prod2"),
     });
 
-    if (!VALID_REQURL) {
+    if (!VALID_REQ_URL) {
       s3LinksUl.createEl("li").createEl("a", {
         href: "https://docs.aws.amazon.com/AmazonS3/latest/userguide/enabling-cors-examples.html",
         text: t("settings_s3_prod3"),
@@ -758,8 +757,8 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
       );
 
     new Setting(s3Div)
-      .setName(t("settings_s3_accesskeyid"))
-      .setDesc(t("settings_s3_accesskeyid_desc"))
+      .setName(t("settings_s3_access_key_id"))
+      .setDesc(t("settings_s3_access_key_id_desc"))
       .addText((text) => {
         wrapTextWithPasswordHide(text);
         text
@@ -772,8 +771,8 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
       });
 
     new Setting(s3Div)
-      .setName(t("settings_s3_secretaccesskey"))
-      .setDesc(t("settings_s3_secretaccesskey_desc"))
+      .setName(t("settings_s3_secret_access_key"))
+      .setDesc(t("settings_s3_secret_access_key_desc"))
       .addText((text) => {
         wrapTextWithPasswordHide(text);
         text
@@ -786,8 +785,8 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
       });
 
     new Setting(s3Div)
-      .setName(t("settings_s3_bucketname"))
-      .setDesc(t("settings_s3_bucketname"))
+      .setName(t("settings_s3_bucket_name"))
+      .setDesc(t("settings_s3_bucket_name"))
       .addText((text) =>
         text
           .setPlaceholder("")
@@ -799,8 +798,8 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
       );
 
     new Setting(s3Div)
-      .setName(t("settings_s3_urlstyle"))
-      .setDesc(t("settings_s3_urlstyle_desc"))
+      .setName(t("settings_s3_url_style"))
+      .setDesc(t("settings_s3_url_style_desc"))
       .addDropdown((dropdown) => {
         dropdown.addOption(
           "virtualHostedStyle",
@@ -819,10 +818,10 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
           });
       });
 
-    if (VALID_REQURL) {
+    if (VALID_REQ_URL) {
       new Setting(s3Div)
-        .setName(t("settings_s3_bypasscorslocally"))
-        .setDesc(t("settings_s3_bypasscorslocally_desc"))
+        .setName(t("settings_s3_bypass_cors_locally"))
+        .setDesc(t("settings_s3_bypass_cors_locally_desc"))
         .addDropdown((dropdown) => {
           dropdown
             .addOption("disable", t("disable"))
@@ -867,19 +866,19 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
       });
 
     new Setting(s3Div)
-      .setName(t("settings_checkonnectivity"))
-      .setDesc(t("settings_checkonnectivity_desc"))
+      .setName(t("settings_check_connectivity"))
+      .setDesc(t("settings_check_connectivity_desc"))
       .addButton(async (button) => {
-        button.setButtonText(t("settings_checkonnectivity_button"));
+        button.setButtonText(t("settings_check_connectivity_button"));
         button.onClick(async () => {
-          new Notice(t("settings_checkonnectivity_checking"));
+          new Notice(t("settings_check_connectivity_checking"));
           const client = new RemoteClient("s3", this.plugin.settings.s3);
           const errors = { msg: "" };
           const res = await client.checkConnectivity((err: any) => {
             errors.msg = err;
           });
           if (res) {
-            new Notice(t("settings_s3_connect_succ"));
+            new Notice(t("settings_s3_connect_success"));
           } else {
             new Notice(t("settings_s3_connect_fail"));
             new Notice(errors.msg);
@@ -888,7 +887,7 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
       });
 
     //////////////////////////////////////////////////
-    // below for dropbpx
+    // below for dropbox
     //////////////////////////////////////////////////
 
     const dropboxDiv = containerEl.createEl("div", { cls: "dropbox-hide" });
@@ -964,16 +963,16 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
             new Notice(t("settings_dropbox_revoke_notice"));
           } catch (err) {
             console.error(err);
-            new Notice(t("settings_dropbox_revoke_noticeerr"));
+            new Notice(t("settings_dropbox_revoke_notice_err"));
           }
         });
       });
 
     new Setting(dropboxRevokeAuthDiv)
-      .setName(t("settings_dropbox_clearlocal"))
-      .setDesc(t("settings_dropbox_clearlocal_desc"))
+      .setName(t("settings_dropbox_clear_local"))
+      .setDesc(t("settings_dropbox_clear_local_desc"))
       .addButton(async (button) => {
-        button.setButtonText(t("settings_dropbox_clearlocal_button"));
+        button.setButtonText(t("settings_dropbox_clear_local_button"));
         button.onClick(async () => {
           this.plugin.settings.dropbox = JSON.parse(
             JSON.stringify(DEFAULT_DROPBOX_CONFIG)
@@ -987,7 +986,7 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
             "dropbox-revoke-auth-button-hide",
             this.plugin.settings.dropbox.username === ""
           );
-          new Notice(t("settings_dropbox_clearlocal_notice"));
+          new Notice(t("settings_dropbox_clear_local_notice"));
         });
       });
 
@@ -1024,8 +1023,8 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
     let newDropboxRemoteBaseDir =
       this.plugin.settings.dropbox.remoteBaseDir || "";
     new Setting(dropboxDiv)
-      .setName(t("settings_remotebasedir"))
-      .setDesc(t("settings_remotebasedir_desc"))
+      .setName(t("settings_remote_base_dir"))
+      .setDesc(t("settings_remote_base_dir_desc"))
       .addText((text) =>
         text
           .setPlaceholder(this.app.vault.getName())
@@ -1047,12 +1046,12 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
       });
 
     new Setting(dropboxDiv)
-      .setName(t("settings_checkonnectivity"))
-      .setDesc(t("settings_checkonnectivity_desc"))
+      .setName(t("settings_check_connectivity"))
+      .setDesc(t("settings_check_connectivity_desc"))
       .addButton(async (button) => {
-        button.setButtonText(t("settings_checkonnectivity_button"));
+        button.setButtonText(t("settings_check_connectivity_button"));
         button.onClick(async () => {
-          new Notice(t("settings_checkonnectivity_checking"));
+          new Notice(t("settings_check_connectivity_checking"));
           const self = this;
           const client = new RemoteClient(
             "dropbox",
@@ -1069,7 +1068,7 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
             errors.msg = `${err}`;
           });
           if (res) {
-            new Notice(t("settings_dropbox_connect_succ"));
+            new Notice(t("settings_dropbox_connect_success"));
           } else {
             new Notice(t("settings_dropbox_connect_fail"));
             new Notice(errors.msg);
@@ -1173,8 +1172,8 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
     let newOnedriveRemoteBaseDir =
       this.plugin.settings.onedrive.remoteBaseDir || "";
     new Setting(onedriveDiv)
-      .setName(t("settings_remotebasedir"))
-      .setDesc(t("settings_remotebasedir_desc"))
+      .setName(t("settings_remote_base_dir"))
+      .setDesc(t("settings_remote_base_dir_desc"))
       .addText((text) =>
         text
           .setPlaceholder(this.app.vault.getName())
@@ -1196,12 +1195,12 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
       });
 
     new Setting(onedriveDiv)
-      .setName(t("settings_checkonnectivity"))
-      .setDesc(t("settings_checkonnectivity_desc"))
+      .setName(t("settings_check_connectivity"))
+      .setDesc(t("settings_check_connectivity_desc"))
       .addButton(async (button) => {
-        button.setButtonText(t("settings_checkonnectivity_button"));
+        button.setButtonText(t("settings_check_connectivity_button"));
         button.onClick(async () => {
-          new Notice(t("settings_checkonnectivity_checking"));
+          new Notice(t("settings_check_connectivity_checking"));
           const self = this;
           const client = new RemoteClient(
             "onedrive",
@@ -1218,7 +1217,7 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
             errors.msg = `${err}`;
           });
           if (res) {
-            new Notice(t("settings_onedrive_connect_succ"));
+            new Notice(t("settings_onedrive_connect_success"));
           } else {
             new Notice(t("settings_onedrive_connect_fail"));
             new Notice(errors.msg);
@@ -1247,7 +1246,7 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
       cls: "webdav-disclaimer",
     });
 
-    if (!VALID_REQURL) {
+    if (!VALID_REQ_URL) {
       webdavLongDescDiv.createEl("p", {
         text: t("settings_webdav_cors_os"),
       });
@@ -1281,7 +1280,7 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
             }
 
             // TODO: any more elegant way?
-            applyWebdavPresetRulesInplace(this.plugin.settings.webdav);
+            applyWebdavPresetRulesInPlace(this.plugin.settings.webdav);
 
             // normally saved
             await this.plugin.saveSettings();
@@ -1333,12 +1332,12 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
       .setDesc(t("settings_webdav_auth_desc"))
       .addDropdown(async (dropdown) => {
         dropdown.addOption("basic", "basic");
-        if (VALID_REQURL) {
+        if (VALID_REQ_URL) {
           dropdown.addOption("digest", "digest");
         }
 
         // new version config, copied to old version, we need to reset it
-        if (!VALID_REQURL && this.plugin.settings.webdav.authType !== "basic") {
+        if (!VALID_REQ_URL && this.plugin.settings.webdav.authType !== "basic") {
           this.plugin.settings.webdav.authType = "basic";
           await this.plugin.saveSettings();
         }
@@ -1385,7 +1384,7 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
           }
 
           // TODO: any more elegant way?
-          applyWebdavPresetRulesInplace(this.plugin.settings.webdav);
+          applyWebdavPresetRulesInPlace(this.plugin.settings.webdav);
 
           // normally save
           await this.plugin.saveSettings();
@@ -1395,8 +1394,8 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
     let newWebdavRemoteBaseDir =
       this.plugin.settings.webdav.remoteBaseDir || "";
     new Setting(webdavDiv)
-      .setName(t("settings_remotebasedir"))
-      .setDesc(t("settings_remotebasedir_desc"))
+      .setName(t("settings_remote_base_dir"))
+      .setDesc(t("settings_remote_base_dir_desc"))
       .addText((text) =>
         text
           .setPlaceholder(this.app.vault.getName())
@@ -1418,12 +1417,12 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
       });
 
     new Setting(webdavDiv)
-      .setName(t("settings_checkonnectivity"))
-      .setDesc(t("settings_checkonnectivity_desc"))
+      .setName(t("settings_check_connectivity"))
+      .setDesc(t("settings_check_connectivity_desc"))
       .addButton(async (button) => {
-        button.setButtonText(t("settings_checkonnectivity_button"));
+        button.setButtonText(t("settings_check_connectivity_button"));
         button.onClick(async () => {
-          new Notice(t("settings_checkonnectivity_checking"));
+          new Notice(t("settings_check_connectivity_checking"));
           const self = this;
           const client = new RemoteClient(
             "webdav",
@@ -1439,12 +1438,12 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
             errors.msg = `${err}`;
           });
           if (res) {
-            new Notice(t("settings_webdav_connect_succ"));
+            new Notice(t("settings_webdav_connect_success"));
           } else {
-            if (VALID_REQURL) {
+            if (VALID_REQ_URL) {
               new Notice(t("settings_webdav_connect_fail"));
             } else {
-              new Notice(t("settings_webdav_connect_fail_withcors"));
+              new Notice(t("settings_webdav_connect_fail_with_cors"));
             }
             new Notice(errors.msg);
           }
@@ -1458,13 +1457,13 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
     // we need to create chooser
     // after all service-div-s being created
     new Setting(serviceChooserDiv)
-      .setName(t("settings_chooseservice"))
-      .setDesc(t("settings_chooseservice_desc"))
+      .setName(t("settings_choose_service"))
+      .setDesc(t("settings_choose_service_desc"))
       .addDropdown(async (dropdown) => {
-        dropdown.addOption("s3", t("settings_chooseservice_s3"));
-        dropdown.addOption("dropbox", t("settings_chooseservice_dropbox"));
-        dropdown.addOption("webdav", t("settings_chooseservice_webdav"));
-        dropdown.addOption("onedrive", t("settings_chooseservice_onedrive"));
+        dropdown.addOption("s3", t("settings_choose_service_s3"));
+        dropdown.addOption("dropbox", t("settings_choose_service_dropbox"));
+        dropdown.addOption("webdav", t("settings_choose_service_webdav"));
+        dropdown.addOption("onedrive", t("settings_choose_service_onedrive"));
         dropdown
           .setValue(this.plugin.settings.serviceType)
           .onChange(async (val: SUPPORTED_SERVICES_TYPE) => {
@@ -1517,14 +1516,14 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
       });
 
     new Setting(basicDiv)
-      .setName(t("settings_autorun"))
-      .setDesc(t("settings_autorun_desc"))
+      .setName(t("settings_auto_run"))
+      .setDesc(t("settings_auto_run_desc"))
       .addDropdown((dropdown) => {
-        dropdown.addOption("-1", t("settings_autorun_notset"));
-        dropdown.addOption(`${1000 * 60 * 1}`, t("settings_autorun_1min"));
-        dropdown.addOption(`${1000 * 60 * 5}`, t("settings_autorun_5min"));
-        dropdown.addOption(`${1000 * 60 * 10}`, t("settings_autorun_10min"));
-        dropdown.addOption(`${1000 * 60 * 30}`, t("settings_autorun_30min"));
+        dropdown.addOption("-1", t("settings_auto_run_not_set"));
+        dropdown.addOption(`${1000 * 60 * 1}`, t("settings_auto_run_1min"));
+        dropdown.addOption(`${1000 * 60 * 5}`, t("settings_auto_run_5min"));
+        dropdown.addOption(`${1000 * 60 * 10}`, t("settings_auto_run_10min"));
+        dropdown.addOption(`${1000 * 60 * 30}`, t("settings_auto_run_30min"));
 
         dropdown
           .setValue(`${this.plugin.settings.autoRunEveryMilliseconds}`)
@@ -1554,21 +1553,21 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
       });
 
     new Setting(basicDiv)
-      .setName(t("settings_runoncestartup"))
-      .setDesc(t("settings_runoncestartup_desc"))
+      .setName(t("settings_run_once_startup"))
+      .setDesc(t("settings_run_once_startup_desc"))
       .addDropdown((dropdown) => {
-        dropdown.addOption("-1", t("settings_runoncestartup_notset"));
+        dropdown.addOption("-1", t("settings_run_once_startup_not_set"));
         dropdown.addOption(
           `${1000 * 1 * 1}`,
-          t("settings_runoncestartup_1sec")
+          t("settings_run_once_startup_1sec")
         );
         dropdown.addOption(
           `${1000 * 10 * 1}`,
-          t("settings_runoncestartup_10sec")
+          t("settings_run_once_startup_10sec")
         );
         dropdown.addOption(
           `${1000 * 30 * 1}`,
-          t("settings_runoncestartup_30sec")
+          t("settings_run_once_startup_30sec")
         );
         dropdown
           .setValue(`${this.plugin.settings.initRunAfterMilliseconds}`)
@@ -1579,10 +1578,10 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
           });
       });
     new Setting(basicDiv)
-      .setName(t("settings_skiplargefiles"))
-      .setDesc(t("settings_skiplargefiles_desc"))
+      .setName(t("settings_skip_large_files"))
+      .setDesc(t("settings_skip_large_files_desc"))
       .addDropdown((dropdown) => {
-        dropdown.addOption("-1", t("settings_skiplargefiles_notset"));
+        dropdown.addOption("-1", t("settings_skip_large_files_not_set"));
 
         const mbs = [1, 5, 10, 50, 100, 500, 1000];
         for (const mb of mbs) {
@@ -1626,8 +1625,8 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
       });
 
     new Setting(advDiv)
-      .setName(t("settings_syncunderscore"))
-      .setDesc(t("settings_syncunderscore_desc"))
+      .setName(t("settings_sync_underscore"))
+      .setDesc(t("settings_sync_underscore_desc"))
       .addDropdown((dropdown) => {
         dropdown.addOption("disable", t("disable"));
         dropdown.addOption("enable", t("enable"));
@@ -1642,9 +1641,9 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
       });
 
     new Setting(advDiv)
-      .setName(t("settings_configdir"))
+      .setName(t("settings_config_dir"))
       .setDesc(
-        t("settings_configdir_desc", {
+        t("settings_config_dir_desc", {
           configDir: this.app.vault.configDir,
         })
       )
@@ -1706,8 +1705,8 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
     debugDiv.createEl("h2", { text: t("settings_debug") });
 
     new Setting(debugDiv)
-      .setName(t("settings_debuglevel"))
-      .setDesc(t("settings_debuglevel_desc"))
+      .setName(t("settings_debug_level"))
+      .setDesc(t("settings_debug_level_desc"))
       .addDropdown(async (dropdown) => {
         dropdown.addOption("info", "info");
         dropdown.addOption("debug", "debug");
@@ -1722,22 +1721,22 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
       });
 
     new Setting(debugDiv)
-      .setName(t("settings_outputsettingsconsole"))
-      .setDesc(t("settings_outputsettingsconsole_desc"))
+      .setName(t("settings_output_settings_console"))
+      .setDesc(t("settings_output_settings_console_desc"))
       .addButton(async (button) => {
-        button.setButtonText(t("settings_outputsettingsconsole_button"));
+        button.setButtonText(t("settings_output_settings_console_button"));
         button.onClick(async () => {
           const c = messyConfigToNormal(await this.plugin.loadData());
           log.info(c);
-          new Notice(t("settings_outputsettingsconsole_notice"));
+          new Notice(t("settings_output_settings_console_notice"));
         });
       });
 
     new Setting(debugDiv)
-      .setName(t("settings_syncplans"))
-      .setDesc(t("settings_syncplans_desc"))
+      .setName(t("settings_sync_plans"))
+      .setDesc(t("settings_sync_plans_desc"))
       .addButton(async (button) => {
-        button.setButtonText(t("settings_syncplans_button_json"));
+        button.setButtonText(t("settings_sync_plans_button_json"));
         button.onClick(async () => {
           await exportVaultSyncPlansToFiles(
             this.plugin.db,
@@ -1745,11 +1744,11 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
             this.plugin.vaultRandomID,
             "json"
           );
-          new Notice(t("settings_syncplans_notice"));
+          new Notice(t("settings_sync_plans_notice"));
         });
       })
       .addButton(async (button) => {
-        button.setButtonText(t("settings_syncplans_button_table"));
+        button.setButtonText(t("settings_sync_plans_button_table"));
         button.onClick(async () => {
           await exportVaultSyncPlansToFiles(
             this.plugin.db,
@@ -1757,23 +1756,23 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
             this.plugin.vaultRandomID,
             "table"
           );
-          new Notice(t("settings_syncplans_notice"));
+          new Notice(t("settings_sync_plans_notice"));
         });
       });
     new Setting(debugDiv)
-      .setName(t("settings_delsyncplans"))
-      .setDesc(t("settings_delsyncplans_desc"))
+      .setName(t("settings_delete_sync_plans"))
+      .setDesc(t("settings_delete_sync_plans_desc"))
       .addButton(async (button) => {
-        button.setButtonText(t("settings_delsyncplans_button"));
+        button.setButtonText(t("settings_delete_sync_plans_button"));
         button.onClick(async () => {
           await clearAllSyncPlanRecords(this.plugin.db);
-          new Notice(t("settings_delsyncplans_notice"));
+          new Notice(t("settings_delete_sync_plans_notice"));
         });
       });
 
     new Setting(debugDiv)
-      .setName(t("settings_logtodb"))
-      .setDesc(t("settings_logtodb_desc"))
+      .setName(t("settings_log_to_db"))
+      .setDesc(t("settings_log_to_db_desc"))
       .addDropdown(async (dropdown) => {
         dropdown.addOption("enable", t("enable"));
         dropdown.addOption("disable", t("disable"));
@@ -1782,7 +1781,7 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
           .onChange(async (val: string) => {
             const logToDB = val === "enable";
             if (logToDB) {
-              applyLogWriterInplace((...msg: any[]) => {
+              applyLogWriterInPlace((...msg: any[]) => {
                 insertLoggerOutputByVault(
                   this.plugin.db,
                   this.plugin.vaultRandomID,
@@ -1790,7 +1789,7 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
                 );
               });
             } else {
-              restoreLogWritterInplace();
+              restoreLogWriterInPlace();
             }
             clearExpiredLoggerOutputRecords(this.plugin.db);
             this.plugin.settings.logToDB = logToDB;
@@ -1799,51 +1798,51 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
       });
 
     new Setting(debugDiv)
-      .setName(t("settings_logtodbexport"))
+      .setName(t("settings_log_to_db_export"))
       .setDesc(
-        t("settings_logtodbexport_desc", {
+        t("settings_log_to_db_export_desc", {
           debugFolder: DEFAULT_DEBUG_FOLDER,
         })
       )
       .addButton(async (button) => {
-        button.setButtonText(t("settings_logtodbexport_button"));
+        button.setButtonText(t("settings_log_to_db_export_button"));
         button.onClick(async () => {
           await exportVaultLoggerOutputToFiles(
             this.plugin.db,
             this.app.vault,
             this.plugin.vaultRandomID
           );
-          new Notice(t("settings_logtodbexport_notice"));
+          new Notice(t("settings_log_to_db_export_notice"));
         });
       });
 
     new Setting(debugDiv)
-      .setName(t("settings_logtodbclear"))
-      .setDesc(t("settings_logtodbclear_desc"))
+      .setName(t("settings_log_to_db_clear"))
+      .setDesc(t("settings_log_to_db_clear_desc"))
       .addButton(async (button) => {
-        button.setButtonText(t("settings_logtodbclear_button"));
+        button.setButtonText(t("settings_log_to_db_clear_button"));
         button.onClick(async () => {
           await clearAllLoggerOutputRecords(this.plugin.db);
-          new Notice(t("settings_logtodbclear_notice"));
+          new Notice(t("settings_log_to_db_clear_notice"));
         });
       });
 
     new Setting(debugDiv)
-      .setName(t("settings_delsyncmap"))
-      .setDesc(t("settings_delsyncmap_desc"))
+      .setName(t("settings_delete_sync_map"))
+      .setDesc(t("settings_delete_sync_map_desc"))
       .addButton(async (button) => {
-        button.setButtonText(t("settings_delsyncmap_button"));
+        button.setButtonText(t("settings_delete_sync_map_button"));
         button.onClick(async () => {
           await clearAllSyncMetaMapping(this.plugin.db);
-          new Notice(t("settings_delsyncmap_notice"));
+          new Notice(t("settings_delete_sync_map_notice"));
         });
       });
 
     new Setting(debugDiv)
-      .setName(t("settings_outputbasepathvaultid"))
-      .setDesc(t("settings_outputbasepathvaultid_desc"))
+      .setName(t("settings_output_base_path_vault_id"))
+      .setDesc(t("settings_output_base_path_vault_id_desc"))
       .addButton(async (button) => {
-        button.setButtonText(t("settings_outputbasepathvaultid_button"));
+        button.setButtonText(t("settings_output_base_path_vault_id_button"));
         button.onClick(async () => {
           new Notice(this.plugin.getVaultBasePath());
           new Notice(this.plugin.vaultRandomID);
@@ -1851,13 +1850,13 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
       });
 
     new Setting(debugDiv)
-      .setName(t("settings_resetcache"))
-      .setDesc(t("settings_resetcache_desc"))
+      .setName(t("settings_reset_cache"))
+      .setDesc(t("settings_reset_cache_desc"))
       .addButton(async (button) => {
-        button.setButtonText(t("settings_resetcache_button"));
+        button.setButtonText(t("settings_reset_cache_button"));
         button.onClick(async () => {
           await destroyDBs();
-          new Notice(t("settings_resetcache_notice"));
+          new Notice(t("settings_reset_cache_notice"));
         });
       });
   }

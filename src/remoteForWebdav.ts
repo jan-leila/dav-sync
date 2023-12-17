@@ -5,7 +5,7 @@ import { Queue } from "@fyears/tsqueue";
 import chunk from "lodash/chunk";
 import flatten from "lodash/flatten";
 import { getReasonPhrase } from "http-status-codes";
-import { RemoteItem, VALID_REQURL, WebdavConfig } from "./baseTypes";
+import { RemoteItem, VALID_REQ_URL, WebdavConfig } from "./baseTypes";
 import { decryptArrayBuffer, encryptArrayBuffer } from "./encrypt";
 import { bufferToArrayBuffer, getPathFolder, mkdirpInVault } from "./misc";
 
@@ -19,7 +19,7 @@ import type {
   ResponseDataDetailed,
 } from "webdav";
 import { getPatcher } from "webdav";
-if (VALID_REQURL) {
+if (VALID_REQ_URL) {
   getPatcher().patch(
     "request",
     async (

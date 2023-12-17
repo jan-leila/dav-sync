@@ -31,19 +31,18 @@ import {
   insertLoggerOutputByVault,
   clearExpiredLoggerOutputRecords,
   clearExpiredSyncPlanRecords,
-} from "./localdb";
+} from "./localDB";
 import { RemoteClient } from "./remote";
 import {
   DEFAULT_DROPBOX_CONFIG,
-  getAuthUrlAndVerifier as getAuthUrlAndVerifierDropbox,
   sendAuthReq as sendAuthReqDropbox,
-  setConfigBySuccessfullAuthInplace as setConfigBySuccessfullAuthInplaceDropbox,
+  setConfigBySuccessfulAuthInPlace as setConfigBySuccessfulAuthInPlaceDropbox,
 } from "./remoteForDropbox";
 import {
   AccessCodeResponseSuccessfulType,
   DEFAULT_ONEDRIVE_CONFIG,
   sendAuthReq as sendAuthReqOnedrive,
-  setConfigBySuccessfullAuthInplace as setConfigBySuccessfullAuthInplaceOnedrive,
+  setConfigBySuccessfulAuthInPlace as setConfigBySuccessfulAuthInPlaceOnedrive,
 } from "./remoteForOnedrive";
 import { DEFAULT_S3_CONFIG } from "./remoteForS3";
 import { DEFAULT_WEBDAV_CONFIG } from "./remoteForWebdav";
@@ -53,13 +52,12 @@ import { doActualSync, getSyncPlan, isPasswordOk } from "./sync";
 import { messyConfigToNormal, normalConfigToMessy } from "./configPersist";
 import { ObsConfigDirFileType, listFilesInObsFolder } from "./obsFolderLister";
 import { I18n } from "./i18n";
-import type { LangType, LangTypeAndAuto, TransItemType } from "./i18n";
+import type { LangTypeAndAuto, TransItemType } from "./i18n";
 
-import { DeletionOnRemote, MetadataOnRemote } from "./metadataOnRemote";
 import { SyncAlgoV2Modal } from "./syncAlgoV2Notice";
-import { applyPresetRulesInplace } from "./presetRules";
+import { applyPresetRulesInPlace } from "./presetRules";
 
-import { applyLogWriterInplace, log } from "./moreOnLog";
+import { applyLogWriterInPlace, log } from "./moreOnLog";
 import AggregateError from "aggregate-error";
 import {
   exportVaultLoggerOutputToFiles,
@@ -75,7 +73,6 @@ const DEFAULT_SETTINGS: RemotelySavePluginSettings = {
   password: "",
   serviceType: "s3",
   currLogLevel: "info",
-  // vaultRandomID: "", // deprecated
   autoRunEveryMilliseconds: -1,
   initRunAfterMilliseconds: -1,
   agreeToUploadExtraMetadata: false,
@@ -148,7 +145,7 @@ export default class RemotelySavePlugin extends Plugin {
     if (this.syncStatus !== "idle") {
       // here the notice is shown regardless of triggerSource
       new Notice(
-        t("syncrun_alreadyrunning", {
+        t("sync_already_running", {
           pluginName: this.manifest.name,
           syncStatus: this.syncStatus,
         })
@@ -175,7 +172,7 @@ export default class RemotelySavePlugin extends Plugin {
         setIcon(this.syncRibbon, iconNameSyncRunning);
         this.syncRibbon.setAttribute(
           "aria-label",
-          t("syncrun_syncingribbon", {
+          t("sync_syncing_ribbon", {
             pluginName: this.manifest.name,
             triggerSource: triggerSource,
           })
@@ -186,15 +183,14 @@ export default class RemotelySavePlugin extends Plugin {
 
       if (triggerSource === "dry") {
         getNotice(
-          t("syncrun_step0", {
+          t("sync_step_0", {
             maxSteps: `${MAX_STEPS}`,
           })
         );
       }
 
-      //log.info(`huh ${this.settings.password}`)
       getNotice(
-        t("syncrun_step1", {
+        t("sync_step_1", {
           maxSteps: `${MAX_STEPS}`,
           serviceType: this.settings.serviceType,
         })
@@ -202,7 +198,7 @@ export default class RemotelySavePlugin extends Plugin {
       this.syncStatus = "preparing";
 
       getNotice(
-        t("syncrun_step2", {
+        t("sync_step_2", {
           maxSteps: `${MAX_STEPS}`,
         })
       );
@@ -218,10 +214,9 @@ export default class RemotelySavePlugin extends Plugin {
         () => self.saveSettings()
       );
       const remoteRsp = await client.listFromRemote();
-      // log.debug(remoteRsp);
 
       getNotice(
-        t("syncrun_step3", {
+        t("sync_step_3", {
           maxSteps: `${MAX_STEPS}`,
         })
       );
@@ -231,12 +226,12 @@ export default class RemotelySavePlugin extends Plugin {
         this.settings.password
       );
       if (!passwordCheckResult.ok) {
-        getNotice(t("syncrun_passworderr"));
+        getNotice(t("sync_password_err"));
         throw Error(passwordCheckResult.reason);
       }
 
       getNotice(
-        t("syncrun_step4", {
+        t("sync_step_4", {
           maxSteps: `${MAX_STEPS}`,
         })
       );
@@ -256,7 +251,7 @@ export default class RemotelySavePlugin extends Plugin {
       );
 
       getNotice(
-        t("syncrun_step5", {
+        t("sync_step_5", {
           maxSteps: `${MAX_STEPS}`,
         })
       );
@@ -274,11 +269,9 @@ export default class RemotelySavePlugin extends Plugin {
           this.manifest.id
         );
       }
-      // log.info(local);
-      // log.info(localHistory);
 
       getNotice(
-        t("syncrun_step6", {
+        t("sync_step_6", {
           maxSteps: `${MAX_STEPS}`,
         })
       );
@@ -306,7 +299,7 @@ export default class RemotelySavePlugin extends Plugin {
 
       if (triggerSource !== "dry") {
         getNotice(
-          t("syncrun_step7", {
+          t("sync_step_7", {
             maxSteps: `${MAX_STEPS}`,
           })
         );
@@ -341,14 +334,14 @@ export default class RemotelySavePlugin extends Plugin {
       } else {
         this.syncStatus = "syncing";
         getNotice(
-          t("syncrun_step7skip", {
+          t("sync_step_7skip", {
             maxSteps: `${MAX_STEPS}`,
           })
         );
       }
 
       getNotice(
-        t("syncrun_step8", {
+        t("sync_step_8", {
           maxSteps: `${MAX_STEPS}`,
         })
       );
@@ -366,7 +359,7 @@ export default class RemotelySavePlugin extends Plugin {
         }-${Date.now()}: finish sync, triggerSource=${triggerSource}`
       );
     } catch (error) {
-      const msg = t("syncrun_abort", {
+      const msg = t("sync_abort", {
         manifestID: this.manifest.id,
         theDate: `${Date.now()}`,
         triggerSource: triggerSource,
@@ -488,7 +481,7 @@ export default class RemotelySavePlugin extends Plugin {
         this.settings = Object.assign({}, this.settings, copied);
         this.saveSettings();
         new Notice(
-          t("protocol_saveqr", {
+          t("protocol_save_qr_code", {
             manifestName: this.manifest.name,
           })
         );
@@ -499,7 +492,7 @@ export default class RemotelySavePlugin extends Plugin {
       COMMAND_CALLBACK,
       async (inputParams) => {
         new Notice(
-          t("protocol_callbacknotsupported", {
+          t("protocol_callback_not_supported", {
             params: JSON.stringify(inputParams),
           })
         );
@@ -529,7 +522,7 @@ export default class RemotelySavePlugin extends Plugin {
           );
 
           const self = this;
-          setConfigBySuccessfullAuthInplaceDropbox(
+          setConfigBySuccessfulAuthInPlaceDropbox(
             this.settings.dropbox,
             authRes,
             () => self.saveSettings()
@@ -550,7 +543,7 @@ export default class RemotelySavePlugin extends Plugin {
           await this.saveSettings();
 
           new Notice(
-            t("protocol_dropbox_connect_succ", {
+            t("protocol_dropbox_connect_success", {
               username: username,
             })
           );
@@ -566,7 +559,7 @@ export default class RemotelySavePlugin extends Plugin {
           this.oauth2Info.authDiv = undefined;
 
           this.oauth2Info.revokeAuthSetting?.setDesc(
-            t("protocol_dropbox_connect_succ_revoke", {
+            t("protocol_dropbox_connect_success_revoke", {
               username: this.settings.dropbox.username,
             })
           );
@@ -615,7 +608,7 @@ export default class RemotelySavePlugin extends Plugin {
           }
 
           const self = this;
-          setConfigBySuccessfullAuthInplaceOnedrive(
+          setConfigBySuccessfulAuthInPlaceOnedrive(
             this.settings.onedrive,
             rsp as AccessCodeResponseSuccessfulType,
             () => self.saveSettings()
@@ -644,7 +637,7 @@ export default class RemotelySavePlugin extends Plugin {
           this.oauth2Info.authDiv = undefined;
 
           this.oauth2Info.revokeAuthSetting?.setDesc(
-            t("protocol_onedrive_connect_succ_revoke", {
+            t("protocol_onedrive_connect_success_revoke", {
               username: this.settings.onedrive.username,
             })
           );
@@ -673,7 +666,7 @@ export default class RemotelySavePlugin extends Plugin {
 
     this.addCommand({
       id: "start-sync",
-      name: t("command_startsync"),
+      name: t("command_start_sync"),
       icon: iconNameSyncWait,
       callback: async () => {
         this.syncRun("manual");
@@ -682,7 +675,7 @@ export default class RemotelySavePlugin extends Plugin {
 
     this.addCommand({
       id: "start-sync-dry-run",
-      name: t("command_drynrun"),
+      name: t("command_dry_run"),
       icon: iconNameSyncWait,
       callback: async () => {
         this.syncRun("dry");
@@ -691,7 +684,7 @@ export default class RemotelySavePlugin extends Plugin {
 
     this.addCommand({
       id: "export-sync-plans-json",
-      name: t("command_exportsyncplans_json"),
+      name: t("command_export_sync_plans_json"),
       icon: iconNameLogs,
       callback: async () => {
         await exportVaultSyncPlansToFiles(
@@ -700,13 +693,13 @@ export default class RemotelySavePlugin extends Plugin {
           this.vaultRandomID,
           "json"
         );
-        new Notice(t("settings_syncplans_notice"));
+        new Notice(t("settings_sync_plans_notice"));
       },
     });
 
     this.addCommand({
       id: "export-sync-plans-table",
-      name: t("command_exportsyncplans_table"),
+      name: t("command_export_sync_plans_table"),
       icon: iconNameLogs,
       callback: async () => {
         await exportVaultSyncPlansToFiles(
@@ -715,13 +708,13 @@ export default class RemotelySavePlugin extends Plugin {
           this.vaultRandomID,
           "table"
         );
-        new Notice(t("settings_syncplans_notice"));
+        new Notice(t("settings_sync_plans_notice"));
       },
     });
 
     this.addCommand({
       id: "export-logs-in-db",
-      name: t("command_exportlogsindb"),
+      name: t("command_export_logs_in_db"),
       icon: iconNameLogs,
       callback: async () => {
         await exportVaultLoggerOutputToFiles(
@@ -729,7 +722,7 @@ export default class RemotelySavePlugin extends Plugin {
           this.app.vault,
           this.vaultRandomID
         );
-        new Notice(t("settings_logtodbexport_notice"));
+        new Notice(t("settings_log_to_db_export_notice"));
       },
     });
 
@@ -796,7 +789,7 @@ export default class RemotelySavePlugin extends Plugin {
   }
 
   async checkIfPresetRulesFollowed() {
-    const res = applyPresetRulesInplace(this.settings);
+    const res = applyPresetRulesInPlace(this.settings);
     if (res.changed) {
       await this.saveSettings();
     }
@@ -810,7 +803,7 @@ export default class RemotelySavePlugin extends Plugin {
     let needSave: boolean = false;
     const current = Date.now();
 
-    // fullfill old version settings
+    // full fill old version settings
     if (
       this.settings.dropbox.refreshToken !== "" &&
       this.settings.dropbox.credentialsShouldBeDeletedAtTime === undefined
@@ -1000,7 +993,7 @@ export default class RemotelySavePlugin extends Plugin {
 
   addOutputToDBIfSet() {
     if (this.settings.logToDB) {
-      applyLogWriterInplace((...msg: any[]) => {
+      applyLogWriterInPlace((...msg: any[]) => {
         insertLoggerOutputByVault(this.db, this.vaultRandomID, ...msg);
       });
     }

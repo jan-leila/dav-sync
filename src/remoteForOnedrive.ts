@@ -8,7 +8,7 @@ import type {
 import cloneDeep from "lodash/cloneDeep";
 import { request, requestUrl, requireApiVersion, Vault } from "obsidian";
 import {
-  VALID_REQURL,
+  VALID_REQ_URL,
   COMMAND_CALLBACK_ONEDRIVE,
   DEFAULT_CONTENT_TYPE,
   OAUTH2_FORCE_EXPIRE_MILLISECONDS,
@@ -177,7 +177,7 @@ export const sendRefreshTokenReq = async (
   }
 };
 
-export const setConfigBySuccessfullAuthInplace = async (
+export const setConfigBySuccessfulAuthInPlace = async (
   config: OnedriveConfig,
   authRes: AccessCodeResponseSuccessfulType,
   saveUpdatedConfigFunc: () => Promise<any> | undefined
@@ -260,7 +260,7 @@ const fromDriveItemToRemoteItem = (
   // e.g.: /Livefolders/应用/remotely-save/${remoteBaseDir}
   const SECOND_COMMON_PREFIX_REGEX = /^\/Livefolders\/[^\/]+\/remotely-save\//g;
 
-  // another possibile prefix
+  // another possible prefix
   const THIRD_COMMON_PREFIX_RAW = `/drive/items/`;
 
   const fullPathOriginal = `${x.parentReference.path}/${x.name}`;
@@ -485,7 +485,7 @@ export class WrappedOnedriveClient {
   deleteJson = async (pathFragOrig: string) => {
     const theUrl = this.buildUrl(pathFragOrig);
     log.debug(`deleteJson, theUrl=${theUrl}`);
-    if (VALID_REQURL) {
+    if (VALID_REQ_URL) {
       await requestUrl({
         url: theUrl,
         method: "DELETE",
@@ -509,7 +509,7 @@ export class WrappedOnedriveClient {
     // TODO:
     // 20220401: On Android, requestUrl has issue that text becomes base64.
     // Use fetch everywhere instead!
-    if (false /*VALID_REQURL*/) {
+    if (false /*VALID_REQ_URL*/) {
       await requestUrl({
         url: theUrl,
         method: "PUT",
@@ -557,7 +557,7 @@ export class WrappedOnedriveClient {
     // TODO:
     // 20220401: On Android, requestUrl has issue that text becomes base64.
     // Use fetch everywhere instead!
-    if (false /*VALID_REQURL*/) {
+    if (false /*VALID_REQ_URL*/) {
       const res = await requestUrl({
         url: theUrl,
         method: "PUT",
@@ -811,7 +811,7 @@ const downloadFromRemoteRaw = async (
     `${key}?$select=@microsoft.graph.downloadUrl`
   );
   const downloadUrl: string = rsp["@microsoft.graph.downloadUrl"];
-  if (VALID_REQURL) {
+  if (VALID_REQ_URL) {
     const content = (
       await requestUrl({
         url: downloadUrl,

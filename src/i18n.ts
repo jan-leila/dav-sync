@@ -9,10 +9,10 @@ export type TransItemType = keyof (typeof LANGS)["en"];
 
 export class I18n {
   lang: LangTypeAndAuto;
-  readonly saveSettingFunc: (tolang: LangTypeAndAuto) => Promise<void>;
+  readonly saveSettingFunc: (toLang: LangTypeAndAuto) => Promise<void>;
   constructor(
     lang: LangTypeAndAuto,
-    saveSettingFunc: (tolang: LangTypeAndAuto) => Promise<void>
+    saveSettingFunc: (toLang: LangTypeAndAuto) => Promise<void>
   ) {
     this.lang = lang;
     this.saveSettingFunc = saveSettingFunc;

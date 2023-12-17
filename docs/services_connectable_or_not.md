@@ -1,6 +1,6 @@
-# services connectability
+# services connectivity
 
-Here is an overview of the connectability ("connectable" or "not connectable" or "in the plan" or "never") to some services by this plugin.
+Here is an overview of the connectivity ("connectable" or "not connectable" or "in the plan" or "never") to some services by this plugin.
 
 The plugin works under the browser environment in Obsidian, so CORS is an issue. Obsidian starts to provide a rich API `requestUrl` for desktop version >= 0.13.25, mobile >= 1.1.1 to bypass the CORS issue. But if the users are still using an older version of Obsidian, they need to configure CORS on server.
 

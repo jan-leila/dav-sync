@@ -33,7 +33,7 @@ export class RemoteClient {
     saveUpdatedConfigFunc?: () => Promise<any>
   ) {
     this.serviceType = serviceType;
-    // the client may modify the config inplace,
+    // the client may modify the config in place,
     // so we use a ref not copy of config here
     if (serviceType === "s3") {
       this.s3Config = s3Config;

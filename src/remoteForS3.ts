@@ -29,7 +29,7 @@ import {
   DEFAULT_CONTENT_TYPE,
   RemoteItem,
   S3Config,
-  VALID_REQURL,
+  VALID_REQ_URL,
 } from "./baseTypes";
 import { decryptArrayBuffer, encryptArrayBuffer } from "./encrypt";
 import {
@@ -198,7 +198,7 @@ export const getS3Client = (s3Config: S3Config) => {
 
   let s3Client: S3Client;
 
-  if (VALID_REQURL && s3Config.bypassCorsLocally) {
+  if (VALID_REQ_URL && s3Config.bypassCorsLocally) {
     s3Client = new S3Client({
       region: s3Config.s3Region,
       endpoint: endpoint,

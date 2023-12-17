@@ -105,7 +105,7 @@ const fromDropboxItemToRemoteItem = (
  * @param allFilesFolders
  * @returns
  */
-const fixLastModifiedTimeInplace = (allFilesFolders: RemoteItem[]) => {
+const fixLastModifiedTimeInPlace = (allFilesFolders: RemoteItem[]) => {
   if (allFilesFolders.length === 0) {
     return;
   }
@@ -116,7 +116,7 @@ const fixLastModifiedTimeInplace = (allFilesFolders: RemoteItem[]) => {
   // a "map" from dir to mtime
   let potentialMTime = {} as Record<string, number>;
 
-  // first sort pass, from buttom to up
+  // first sort pass, from bottom to top
   for (const item of allFilesFolders) {
     if (item.key.endsWith("/")) {
       // itself is a folder, and initially doesn't have mtime
@@ -138,7 +138,7 @@ const fixLastModifiedTimeInplace = (allFilesFolders: RemoteItem[]) => {
     }
   }
 
-  // second pass, from up to buttom.
+  // second pass, from top to bottom.
   // fill mtime by parent folder or Date.Now() if still not available.
   // this is only possible if no any sub-folder-files recursively.
   // we do not sort the array again, just iterate over it by reverse
@@ -170,13 +170,13 @@ const fixLastModifiedTimeInplace = (allFilesFolders: RemoteItem[]) => {
 
 export const getAuthUrlAndVerifier = async (
   appKey: string,
-  needManualPatse: boolean = false
+  needManualPaste: boolean = false
 ) => {
   const auth = new DropboxAuth({
     clientId: appKey,
   });
 
-  const callback = needManualPatse
+  const callback = needManualPaste
     ? undefined
     : `obsidian://${COMMAND_CALLBACK_DROPBOX}`;
   const authUrl = (
@@ -244,7 +244,7 @@ export const sendRefreshTokenReq = async (
   return resp2;
 };
 
-export const setConfigBySuccessfullAuthInplace = async (
+export const setConfigBySuccessfulAuthInPlace = async (
   config: DropboxConfig,
   authRes: DropboxSuccessAuthRes,
   saveUpdatedConfigFunc: () => Promise<any> | undefined
@@ -390,7 +390,7 @@ export class WrappedDropboxClient {
         this.dropboxConfig.refreshToken
       );
 
-      setConfigBySuccessfullAuthInplace(
+      setConfigBySuccessfulAuthInPlace(
         this.dropboxConfig,
         resp,
         this.saveUpdatedConfigFunc
@@ -656,7 +656,7 @@ export const listFromRemote = async (
     unifiedContents.push(...unifiedContents2);
   }
 
-  fixLastModifiedTimeInplace(unifiedContents);
+  fixLastModifiedTimeInPlace(unifiedContents);
 
   return {
     Contents: unifiedContents,

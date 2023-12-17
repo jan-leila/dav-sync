@@ -19,11 +19,11 @@ export class SyncAlgoV2Modal extends Modal {
     };
 
     contentEl.createEl("h2", {
-      text: t("syncalgov2_title"),
+      text: t("sync_algo_v2_title"),
     });
 
     const ul = contentEl.createEl("ul");
-    t("syncalgov2_texts")
+    t("sync_algo_v2_texts")
       .split("\n")
       .forEach((val) => {
         ul.createEl("li", {
@@ -33,14 +33,14 @@ export class SyncAlgoV2Modal extends Modal {
 
     new Setting(contentEl)
       .addButton((button) => {
-        button.setButtonText(t("syncalgov2_button_agree"));
+        button.setButtonText(t("sync_algo_v2_button_agree"));
         button.onClick(async () => {
           this.agree = true;
           this.close();
         });
       })
       .addButton((button) => {
-        button.setButtonText(t("syncalgov2_button_disagree"));
+        button.setButtonText(t("sync_algo_v2_button_disagree"));
         button.onClick(() => {
           this.close();
         });

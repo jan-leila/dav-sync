@@ -23,15 +23,15 @@ import {
   MAGIC_ENCRYPTED_PREFIX_BASE32,
   MAGIC_ENCRYPTED_PREFIX_BASE64URL,
 } from "./encrypt";
-import type { FileFolderHistoryRecord, InternalDBs } from "./localdb";
+import type { FileFolderHistoryRecord, InternalDBs } from "./localDB";
 import {
   clearDeleteRenameHistoryOfKeyAndVault,
   getSyncMetaMappingByRemoteKeyAndVault,
   upsertSyncMetaMappingDataByVault,
-} from "./localdb";
+} from "./localDB";
 import {
   isHiddenPath,
-  isVaildText,
+  isValidText,
   mkdirpInVault,
   getFolderLevels,
   getParentFolder,
@@ -45,8 +45,8 @@ import {
   DeletionOnRemote,
   serializeMetadataOnRemote,
   deserializeMetadataOnRemote,
-  DEFAULT_FILE_NAME_FOR_METADATAONREMOTE,
-  DEFAULT_FILE_NAME_FOR_METADATAONREMOTE2,
+  DEFAULT_FILE_NAME_FOR_METADATA_ON_REMOTE,
+  DEFAULT_FILE_NAME_FOR_METADATA_ON_REMOTE2,
   isEqualMetadataOnRemote,
 } from "./metadataOnRemote";
 import { isInsideObsFolder, ObsConfigDirFileType } from "./obsFolderLister";
@@ -97,8 +97,8 @@ export const isPasswordOk = async (
       reason: "empty_remote",
     } as PasswordCheckType;
   }
-  const santyCheckKey = remote[0].key;
-  if (santyCheckKey.startsWith(MAGIC_ENCRYPTED_PREFIX_BASE32)) {
+  const sanityCheckKey = remote[0].key;
+  if (sanityCheckKey.startsWith(MAGIC_ENCRYPTED_PREFIX_BASE32)) {
     // this is encrypted using old base32!
     // try to decrypt it using the provided password.
     if (password === "") {
@@ -108,11 +108,11 @@ export const isPasswordOk = async (
       } as PasswordCheckType;
     }
     try {
-      const res = await decryptBase32ToString(santyCheckKey, password);
+      const res = await decryptBase32ToString(sanityCheckKey, password);
 
       // additional test
       // because iOS Safari bypasses decryption with wrong password!
-      if (isVaildText(res)) {
+      if (isValidText(res)) {
         return {
           ok: true,
           reason: "password_matched",
@@ -130,7 +130,7 @@ export const isPasswordOk = async (
       } as PasswordCheckType;
     }
   }
-  if (santyCheckKey.startsWith(MAGIC_ENCRYPTED_PREFIX_BASE64URL)) {
+  if (sanityCheckKey.startsWith(MAGIC_ENCRYPTED_PREFIX_BASE64URL)) {
     // this is encrypted using new base64url!
     // try to decrypt it using the provided password.
     if (password === "") {
@@ -140,11 +140,11 @@ export const isPasswordOk = async (
       } as PasswordCheckType;
     }
     try {
-      const res = await decryptBase64urlToString(santyCheckKey, password);
+      const res = await decryptBase64urlToString(sanityCheckKey, password);
 
       // additional test
       // because iOS Safari bypasses decryption with wrong password!
-      if (isVaildText(res)) {
+      if (isValidText(res)) {
         return {
           ok: true,
           reason: "password_matched",
@@ -218,16 +218,16 @@ export const parseRemoteItems = async (
     let r = {} as FileOrFolderMixedState;
     if (backwardMapping !== undefined) {
       key = backwardMapping.localKey;
-      const mtimeRemote = backwardMapping.localMtime || entry.lastModified;
+      const modifiedTimeRemote = backwardMapping.localMtime || entry.lastModified;
 
       // the backwardMapping.localSize is the file BEFORE encryption
-      // we want to split two sizes for comparation later
+      // we want to split two sizes for comparison later
 
       r = {
         key: key,
         existRemote: true,
-        mtimeRemote: mtimeRemote,
-        mtimeRemoteFmt: unixTimeToStr(mtimeRemote),
+        modifiedTimeRemote: modifiedTimeRemote,
+        modifiedTimeRemoteFmt: unixTimeToStr(modifiedTimeRemote),
         sizeRemote: backwardMapping.localSize,
         sizeRemoteEnc: password === "" ? undefined : entry.size,
         remoteEncryptedKey: remoteEncryptedKey,
@@ -238,8 +238,8 @@ export const parseRemoteItems = async (
       r = {
         key: key,
         existRemote: true,
-        mtimeRemote: entry.lastModified,
-        mtimeRemoteFmt: unixTimeToStr(entry.lastModified),
+        modifiedTimeRemote: entry.lastModified,
+        modifiedTimeRemoteFmt: unixTimeToStr(entry.lastModified),
         sizeRemote: password === "" ? entry.size : undefined,
         sizeRemoteEnc: password === "" ? undefined : entry.size,
         remoteEncryptedKey: remoteEncryptedKey,
@@ -247,10 +247,10 @@ export const parseRemoteItems = async (
       };
     }
 
-    if (r.key === DEFAULT_FILE_NAME_FOR_METADATAONREMOTE) {
+    if (r.key === DEFAULT_FILE_NAME_FOR_METADATA_ON_REMOTE) {
       metadataFile = Object.assign({}, r);
     }
-    if (r.key === DEFAULT_FILE_NAME_FOR_METADATAONREMOTE2) {
+    if (r.key === DEFAULT_FILE_NAME_FOR_METADATA_ON_REMOTE2) {
       throw Error(
         `A reserved file name ${r.key} has been found. You may upgrade the plugin to latest version to try to deal with it.`
       );
@@ -280,7 +280,7 @@ export const fetchMetadataFile = async (
   const buf = await client.downloadFromRemote(
     metadataFile.key,
     vault,
-    metadataFile.mtimeRemote,
+    metadataFile.modifiedTimeRemote,
     password,
     metadataFile.remoteEncryptedKey,
     true
@@ -301,8 +301,8 @@ const isSkipItem = (
   return (
     isHiddenPath(key, true, false) ||
     (!syncUnderscoreItems && isHiddenPath(key, false, true)) ||
-    key === DEFAULT_FILE_NAME_FOR_METADATAONREMOTE ||
-    key === DEFAULT_FILE_NAME_FOR_METADATAONREMOTE2
+    key === DEFAULT_FILE_NAME_FOR_METADATA_ON_REMOTE ||
+    key === DEFAULT_FILE_NAME_FOR_METADATA_ON_REMOTE2
   );
 };
 
@@ -337,12 +337,12 @@ const ensembleMixedStates = async (
       // ignore
       continue;
     } else if (entry instanceof TFile) {
-      const mtimeLocal = Math.max(entry.stat.mtime ?? 0, entry.stat.ctime ?? 0);
+      const modifiedTimeLocal = Math.max(entry.stat.mtime ?? 0, entry.stat.ctime ?? 0);
       r = {
         key: entry.path,
         existLocal: true,
-        mtimeLocal: mtimeLocal,
-        mtimeLocalFmt: unixTimeToStr(mtimeLocal),
+        modifiedTimeLocal: modifiedTimeLocal,
+        modifiedTimeLocalFmt: unixTimeToStr(modifiedTimeLocal),
         sizeLocal: entry.stat.size,
         sizeLocalEnc:
           password === "" ? undefined : getSizeFromOrigToEnc(entry.stat.size),
@@ -352,8 +352,8 @@ const ensembleMixedStates = async (
       r = {
         key: key,
         existLocal: true,
-        mtimeLocal: undefined,
-        mtimeLocalFmt: undefined,
+        modifiedTimeLocal: undefined,
+        modifiedTimeLocalFmt: undefined,
         sizeLocal: 0,
         sizeLocalEnc: password === "" ? undefined : getSizeFromOrigToEnc(0),
       };
@@ -368,8 +368,8 @@ const ensembleMixedStates = async (
     if (results.hasOwnProperty(key)) {
       results[key].key = r.key;
       results[key].existLocal = r.existLocal;
-      results[key].mtimeLocal = r.mtimeLocal;
-      results[key].mtimeLocalFmt = r.mtimeLocalFmt;
+      results[key].modifiedTimeLocal = r.modifiedTimeLocal;
+      results[key].modifiedTimeLocalFmt = r.modifiedTimeLocalFmt;
       results[key].sizeLocal = r.sizeLocal;
       results[key].sizeLocalEnc = r.sizeLocalEnc;
     } else {
@@ -381,15 +381,15 @@ const ensembleMixedStates = async (
   if (syncConfigDir && localConfigDirContents !== undefined) {
     for (const entry of localConfigDirContents) {
       const key = entry.key;
-      let mtimeLocal = Math.max(entry.mtime ?? 0, entry.ctime ?? 0);
-      if (Number.isNaN(mtimeLocal) || mtimeLocal === 0) {
-        mtimeLocal = undefined;
+      let modifiedTimeLocal = Math.max(entry.mtime ?? 0, entry.ctime ?? 0);
+      if (Number.isNaN(modifiedTimeLocal) || modifiedTimeLocal === 0) {
+        modifiedTimeLocal = undefined;
       }
       const r: FileOrFolderMixedState = {
         key: key,
         existLocal: true,
-        mtimeLocal: mtimeLocal,
-        mtimeLocalFmt: unixTimeToStr(mtimeLocal),
+        modifiedTimeLocal: modifiedTimeLocal,
+        modifiedTimeLocalFmt: unixTimeToStr(modifiedTimeLocal),
         sizeLocal: entry.size,
         sizeLocalEnc:
           password === "" ? undefined : getSizeFromOrigToEnc(entry.size),
@@ -398,8 +398,8 @@ const ensembleMixedStates = async (
       if (results.hasOwnProperty(key)) {
         results[key].key = r.key;
         results[key].existLocal = r.existLocal;
-        results[key].mtimeLocal = r.mtimeLocal;
-        results[key].mtimeLocalFmt = r.mtimeLocalFmt;
+        results[key].modifiedTimeLocal = r.modifiedTimeLocal;
+        results[key].modifiedTimeLocalFmt = r.modifiedTimeLocalFmt;
         results[key].sizeLocal = r.sizeLocal;
         results[key].sizeLocalEnc = r.sizeLocalEnc;
       } else {
@@ -413,8 +413,8 @@ const ensembleMixedStates = async (
     const key = entry.key;
     const r = {
       key: key,
-      deltimeRemote: entry.actionWhen,
-      deltimeRemoteFmt: unixTimeToStr(entry.actionWhen),
+      deleteTimeRemote: entry.actionWhen,
+      deleteTimeRemoteFmt: unixTimeToStr(entry.actionWhen),
     } as FileOrFolderMixedState;
 
     if (isSkipItem(key, syncConfigDir, syncUnderscoreItems, configDir)) {
@@ -423,8 +423,8 @@ const ensembleMixedStates = async (
 
     if (results.hasOwnProperty(key)) {
       results[key].key = r.key;
-      results[key].deltimeRemote = r.deltimeRemote;
-      results[key].deltimeRemoteFmt = r.deltimeRemoteFmt;
+      results[key].deleteTimeRemote = r.deleteTimeRemote;
+      results[key].deleteTimeRemoteFmt = r.deleteTimeRemoteFmt;
     } else {
       results[key] = r;
 
@@ -452,13 +452,13 @@ const ensembleMixedStates = async (
     if (entry.actionType === "delete" || entry.actionType === "rename") {
       const r = {
         key: key,
-        deltimeLocal: entry.actionWhen,
-        deltimeLocalFmt: unixTimeToStr(entry.actionWhen),
+        deleteTimeLocal: entry.actionWhen,
+        deleteTimeLocalFmt: unixTimeToStr(entry.actionWhen),
       } as FileOrFolderMixedState;
 
       if (results.hasOwnProperty(key)) {
-        results[key].deltimeLocal = r.deltimeLocal;
-        results[key].deltimeLocalFmt = r.deltimeLocalFmt;
+        results[key].deleteTimeLocal = r.deleteTimeLocal;
+        results[key].deleteTimeLocalFmt = r.deleteTimeLocalFmt;
       } else {
         results[key] = r;
         results[key].existLocal = false; // we have already checked local
@@ -467,20 +467,20 @@ const ensembleMixedStates = async (
     } else if (entry.actionType === "renameDestination") {
       const r = {
         key: key,
-        mtimeLocal: entry.actionWhen,
-        mtimeLocalFmt: unixTimeToStr(entry.actionWhen),
+        modifiedTimeLocal: entry.actionWhen,
+        modifiedTimeLocalFmt: unixTimeToStr(entry.actionWhen),
         changeLocalMtimeUsingMapping: true,
       };
       if (results.hasOwnProperty(key)) {
-        let mtimeLocal = Math.max(
-          r.mtimeLocal ?? 0,
-          results[key].mtimeLocal ?? 0
+        let modifiedTimeLocal = Math.max(
+          r.modifiedTimeLocal ?? 0,
+          results[key].modifiedTimeLocal ?? 0
         );
-        if (Number.isNaN(mtimeLocal) || mtimeLocal === 0) {
-          mtimeLocal = undefined;
+        if (Number.isNaN(modifiedTimeLocal) || modifiedTimeLocal === 0) {
+          modifiedTimeLocal = undefined;
         }
-        results[key].mtimeLocal = mtimeLocal;
-        results[key].mtimeLocalFmt = unixTimeToStr(mtimeLocal);
+        results[key].modifiedTimeLocal = modifiedTimeLocal;
+        results[key].modifiedTimeLocalFmt = unixTimeToStr(modifiedTimeLocal);
         results[key].changeLocalMtimeUsingMapping =
           r.changeLocalMtimeUsingMapping;
       } else {
@@ -504,7 +504,7 @@ const ensembleMixedStates = async (
   return results;
 };
 
-const assignOperationToFileInplace = (
+const assignOperationToFileInPlace = (
   origRecord: FileOrFolderMixedState,
   keptFolder: Set<string>,
   skipSizeLargerThan: number,
@@ -521,7 +521,7 @@ const assignOperationToFileInplace = (
   // we find the max date from four sources
 
   // 0. find anything inconsistent
-  if (r.existLocal && (r.mtimeLocal === undefined || r.mtimeLocal <= 0)) {
+  if (r.existLocal && (r.modifiedTimeLocal === undefined || r.modifiedTimeLocal <= 0)) {
     throw Error(
       `Error: Abnormal last modified time locally: ${JSON.stringify(
         r,
@@ -530,7 +530,7 @@ const assignOperationToFileInplace = (
       )}`
     );
   }
-  if (r.existRemote && (r.mtimeRemote === undefined || r.mtimeRemote <= 0)) {
+  if (r.existRemote && (r.modifiedTimeRemote === undefined || r.modifiedTimeRemote <= 0)) {
     throw Error(
       `Error: Abnormal last modified time remotely: ${JSON.stringify(
         r,
@@ -539,12 +539,12 @@ const assignOperationToFileInplace = (
       )}`
     );
   }
-  if (r.deltimeLocal !== undefined && r.deltimeLocal <= 0) {
+  if (r.deleteTimeLocal !== undefined && r.deleteTimeLocal <= 0) {
     throw Error(
       `Error: Abnormal deletion time locally: ${JSON.stringify(r, null, 2)}`
     );
   }
-  if (r.deltimeRemote !== undefined && r.deltimeRemote <= 0) {
+  if (r.deleteTimeRemote !== undefined && r.deleteTimeRemote <= 0) {
     throw Error(
       `Error: Abnormal deletion time remotely: ${JSON.stringify(r, null, 2)}`
     );
@@ -562,15 +562,15 @@ const assignOperationToFileInplace = (
   const sizeLocalComp = password === "" ? r.sizeLocal : r.sizeLocalEnc;
   const sizeRemoteComp = password === "" ? r.sizeRemote : r.sizeRemoteEnc;
 
-  // 1. mtimeLocal
+  // 1. modifiedTimeLocal
   if (r.existLocal) {
-    const mtimeRemote = r.existRemote ? r.mtimeRemote : -1;
-    const deltimeRemote = r.deltimeRemote !== undefined ? r.deltimeRemote : -1;
-    const deltimeLocal = r.deltimeLocal !== undefined ? r.deltimeLocal : -1;
+    const modifiedTimeRemote = r.existRemote ? r.modifiedTimeRemote : -1;
+    const deleteTimeRemote = r.deleteTimeRemote !== undefined ? r.deleteTimeRemote : -1;
+    const deleteTimeLocal = r.deleteTimeLocal !== undefined ? r.deleteTimeLocal : -1;
     if (
-      r.mtimeLocal >= mtimeRemote &&
-      r.mtimeLocal >= deltimeLocal &&
-      r.mtimeLocal >= deltimeRemote
+      r.modifiedTimeLocal >= modifiedTimeRemote &&
+      r.modifiedTimeLocal >= deleteTimeLocal &&
+      r.modifiedTimeLocal >= deleteTimeRemote
     ) {
       if (sizeLocalComp === undefined) {
         throw new Error(
@@ -581,8 +581,8 @@ const assignOperationToFileInplace = (
           )}`
         );
       }
-      if (r.mtimeLocal === r.mtimeRemote) {
-        // local and remote both exist and mtimes are the same
+      if (r.modifiedTimeLocal === r.modifiedTimeRemote) {
+        // local and remote both exist and modified times are the same
         if (sizeLocalComp === sizeRemoteComp) {
           // do not need to consider skipSizeLargerThan in this case
           r.decision = "skipUploading";
@@ -613,7 +613,7 @@ const assignOperationToFileInplace = (
           }
         }
       } else {
-        // we have local laregest mtime,
+        // we have local largest modified time,
         // and the remote not existing or smaller mtime
         if (skipSizeLargerThan <= 0) {
           // no need to consider sizes
@@ -651,17 +651,17 @@ const assignOperationToFileInplace = (
     }
   }
 
-  // 2. mtimeRemote
+  // 2. modifiedTimeRemote
   if (r.existRemote) {
-    const mtimeLocal = r.existLocal ? r.mtimeLocal : -1;
-    const deltimeRemote = r.deltimeRemote !== undefined ? r.deltimeRemote : -1;
-    const deltimeLocal = r.deltimeLocal !== undefined ? r.deltimeLocal : -1;
+    const modifiedTimeLocal = r.existLocal ? r.modifiedTimeLocal : -1;
+    const deleteTimeRemote = r.deleteTimeRemote !== undefined ? r.deleteTimeRemote : -1;
+    const deleteTimeLocal = r.deleteTimeLocal !== undefined ? r.deleteTimeLocal : -1;
     if (
-      r.mtimeRemote > mtimeLocal &&
-      r.mtimeRemote >= deltimeLocal &&
-      r.mtimeRemote >= deltimeRemote
+      r.modifiedTimeRemote > modifiedTimeLocal &&
+      r.modifiedTimeRemote >= deleteTimeLocal &&
+      r.modifiedTimeRemote >= deleteTimeRemote
     ) {
-      // we have remote laregest mtime,
+      // we have remote largest mtime,
       // and the local not existing or smaller mtime
       if (sizeRemoteComp === undefined) {
         throw new Error(
@@ -709,15 +709,15 @@ const assignOperationToFileInplace = (
     }
   }
 
-  // 3. deltimeLocal
-  if (r.deltimeLocal !== undefined && r.deltimeLocal !== 0) {
-    const mtimeLocal = r.existLocal ? r.mtimeLocal : -1;
-    const mtimeRemote = r.existRemote ? r.mtimeRemote : -1;
-    const deltimeRemote = r.deltimeRemote !== undefined ? r.deltimeRemote : -1;
+  // 3. deleteTimeLocal
+  if (r.deleteTimeLocal !== undefined && r.deleteTimeLocal !== 0) {
+    const modifiedTimeLocal = r.existLocal ? r.modifiedTimeLocal : -1;
+    const modifiedTimeRemote = r.existRemote ? r.modifiedTimeRemote : -1;
+    const deleteTimeRemote = r.deleteTimeRemote !== undefined ? r.deleteTimeRemote : -1;
     if (
-      r.deltimeLocal >= mtimeLocal &&
-      r.deltimeLocal >= mtimeRemote &&
-      r.deltimeLocal >= deltimeRemote
+      r.deleteTimeLocal >= modifiedTimeLocal &&
+      r.deleteTimeLocal >= modifiedTimeRemote &&
+      r.deleteTimeLocal >= deleteTimeRemote
     ) {
       if (skipSizeLargerThan <= 0) {
         r.decision = "uploadLocalDelHistToRemote";
@@ -762,15 +762,15 @@ const assignOperationToFileInplace = (
     }
   }
 
-  // 4. deltimeRemote
-  if (r.deltimeRemote !== undefined && r.deltimeRemote !== 0) {
-    const mtimeLocal = r.existLocal ? r.mtimeLocal : -1;
-    const mtimeRemote = r.existRemote ? r.mtimeRemote : -1;
-    const deltimeLocal = r.deltimeLocal !== undefined ? r.deltimeLocal : -1;
+  // 4. deleteTimeRemote
+  if (r.deleteTimeRemote !== undefined && r.deleteTimeRemote !== 0) {
+    const modifiedTimeLocal = r.existLocal ? r.modifiedTimeLocal : -1;
+    const modifiedTimeRemote = r.existRemote ? r.modifiedTimeRemote : -1;
+    const deleteTimeLocal = r.deleteTimeLocal !== undefined ? r.deleteTimeLocal : -1;
     if (
-      r.deltimeRemote >= mtimeLocal &&
-      r.deltimeRemote >= mtimeRemote &&
-      r.deltimeRemote >= deltimeLocal
+      r.deleteTimeRemote >= modifiedTimeLocal &&
+      r.deleteTimeRemote >= modifiedTimeRemote &&
+      r.deleteTimeRemote >= deleteTimeLocal
     ) {
       if (skipSizeLargerThan <= 0) {
         r.decision = "keepRemoteDelHist";
@@ -818,7 +818,7 @@ const assignOperationToFileInplace = (
   throw Error(`no decision for ${JSON.stringify(r)}`);
 };
 
-const assignOperationToFolderInplace = async (
+const assignOperationToFolderInPlace = async (
   origRecord: FileOrFolderMixedState,
   keptFolder: Set<string>,
   vault: Vault,
@@ -835,23 +835,23 @@ const assignOperationToFolderInplace = async (
   if (!keptFolder.has(r.key)) {
     // the folder does NOT have any must-be-kept children!
 
-    if (r.deltimeLocal !== undefined || r.deltimeRemote !== undefined) {
+    if (r.deleteTimeLocal !== undefined || r.deleteTimeRemote !== undefined) {
       // it has some deletion "commands"
 
-      const deltimeLocal = r.deltimeLocal !== undefined ? r.deltimeLocal : -1;
-      const deltimeRemote =
-        r.deltimeRemote !== undefined ? r.deltimeRemote : -1;
+      const deleteTimeLocal = r.deleteTimeLocal !== undefined ? r.deleteTimeLocal : -1;
+      const deleteTimeRemote =
+        r.deleteTimeRemote !== undefined ? r.deleteTimeRemote : -1;
 
       // if it was created after deletion, we should keep it as is
       if (requireApiVersion(API_VER_STAT_FOLDER)) {
         if (r.existLocal) {
           const { ctime, mtime } = await statFix(vault, r.key);
-          const cmtime = Math.max(ctime ?? 0, mtime ?? 0);
+          const create_modify_time = Math.max(ctime ?? 0, mtime ?? 0);
           if (
-            !Number.isNaN(cmtime) &&
-            cmtime > 0 &&
-            cmtime >= deltimeLocal &&
-            cmtime >= deltimeRemote
+            !Number.isNaN(create_modify_time) &&
+            create_modify_time > 0 &&
+            create_modify_time >= deleteTimeLocal &&
+            create_modify_time >= deleteTimeRemote
           ) {
             keptFolder.add(getParentFolder(r.key));
             if (r.existLocal && r.existRemote) {
@@ -872,13 +872,13 @@ const assignOperationToFolderInplace = async (
       // If it was moved to here, after deletion, we should keep it as is.
       // The logic not necessarily needs API_VER_STAT_FOLDER.
       // The folder needs this logic because it's also determined by file children.
-      // But the file do not need this logic because the mtimeLocal is checked firstly.
+      // But the file do not need this logic because the modifiedTimeLocal is checked firstly.
       if (
         r.existLocal &&
         r.changeLocalMtimeUsingMapping &&
-        r.mtimeLocal > 0 &&
-        r.mtimeLocal > deltimeLocal &&
-        r.mtimeLocal > deltimeRemote
+        r.modifiedTimeLocal > 0 &&
+        r.modifiedTimeLocal > deleteTimeLocal &&
+        r.modifiedTimeLocal > deleteTimeRemote
       ) {
         keptFolder.add(getParentFolder(r.key));
         if (r.existLocal && r.existRemote) {
@@ -896,7 +896,7 @@ const assignOperationToFolderInplace = async (
 
       if (r.decision === undefined) {
         // not yet decided by the above reason
-        if (deltimeLocal > 0 && deltimeLocal > deltimeRemote) {
+        if (deleteTimeLocal > 0 && deleteTimeLocal > deleteTimeRemote) {
           r.decision = "uploadLocalDelHistToRemoteFolder";
           r.decisionBranch = 8;
         } else {
@@ -997,11 +997,11 @@ export const getSyncPlan = async (
       // decide some folders
       // because the keys are sorted by length
       // so all the children must have been shown up before in the iteration
-      await assignOperationToFolderInplace(val, keptFolder, vault, password);
+      await assignOperationToFolderInPlace(val, keptFolder, vault, password);
     } else {
       // get all operations of files
       // and at the same time get some helper info for folders
-      assignOperationToFileInplace(
+      assignOperationToFileInPlace(
         val,
         keptFolder,
         skipSizeLargerThan,
@@ -1017,22 +1017,22 @@ export const getSyncPlan = async (
       if (val.decision === "uploadLocalDelHistToRemote") {
         deletions.push({
           key: key,
-          actionWhen: val.deltimeLocal,
+          actionWhen: val.deleteTimeLocal,
         });
       } else if (val.decision === "keepRemoteDelHist") {
         deletions.push({
           key: key,
-          actionWhen: val.deltimeRemote,
+          actionWhen: val.deleteTimeRemote,
         });
       } else if (val.decision === "uploadLocalDelHistToRemoteFolder") {
         deletions.push({
           key: key,
-          actionWhen: val.deltimeLocal,
+          actionWhen: val.deleteTimeLocal,
         });
       } else if (val.decision === "keepRemoteDelHistFolder") {
         deletions.push({
           key: key,
-          actionWhen: val.deltimeRemote,
+          actionWhen: val.deleteTimeRemote,
         });
       } else {
         throw Error(`do not know how to delete for decision ${val.decision}`);
@@ -1068,7 +1068,7 @@ const uploadExtraMeta = async (
     return;
   }
 
-  const key = DEFAULT_FILE_NAME_FOR_METADATAONREMOTE;
+  const key = DEFAULT_FILE_NAME_FOR_METADATA_ON_REMOTE;
   let remoteEncryptedKey = key;
 
   if (password !== "") {
@@ -1171,7 +1171,7 @@ const dispatchOperationToActual = async (
         client.serviceType,
         db,
         r.key,
-        r.mtimeLocal,
+        r.modifiedTimeLocal,
         r.sizeLocal,
         r.key,
         remoteObjMeta.lastModified,
@@ -1186,7 +1186,7 @@ const dispatchOperationToActual = async (
     await client.downloadFromRemote(
       r.key,
       vault,
-      r.mtimeRemote,
+      r.modifiedTimeRemote,
       password,
       remoteEncryptedKey
     );
@@ -1207,7 +1207,7 @@ const dispatchOperationToActual = async (
         client.serviceType,
         db,
         r.key,
-        r.mtimeLocal,
+        r.modifiedTimeLocal,
         r.sizeLocal,
         r.key,
         remoteObjMeta.lastModified,
@@ -1309,7 +1309,7 @@ const splitThreeSteps = (syncPlan: SyncPlanType, sortedKeys: string[]) => {
   // the deletionOps should be run from max level to min level
   // right now it is sorted by level from min to max (NOT length of key!)
   // so we need to reverse it!
-  deletionOps.reverse(); // inplace reverse
+  deletionOps.reverse(); // in place reverse
 
   return {
     folderCreationOps: folderCreationOps,
@@ -1389,8 +1389,8 @@ export const doActualSync = async (
     splitThreeSteps(syncPlan, sortedKeys);
   const nested = [folderCreationOps, deletionOps, uploadDownloads];
   const logTexts = [
-    `1. create all folders from shadowest to deepest, also check undefined decision`,
-    `2. delete files and folders from deepest to shadowest`,
+    `1. create all folders from shallowest to deepest, also check undefined decision`,
+    `2. delete files and folders from deepest to shallowest`,
     `3. upload or download files in parallel, with the desired concurrency=${concurrency}`,
   ];
 

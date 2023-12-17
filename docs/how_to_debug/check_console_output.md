@@ -20,4 +20,4 @@ Go to the plugin settings, scroll down to the section "Debug" -> "alter console 
 
   You need to [enable USB debugging](https://developer.android.com/studio/debug/dev-options#enable) on your Android, then connect your Android to a computer using USB, then open the **desktop** Chrome browser and go to the special web page <chrome://inspect>. You shall be able to see the "inspect" link inside the special page, then click the link to open the console. After debugging, remember to turn off USB debugging.
 
-Trigger the sync manually (by clicking the icon on the ribbon sidebar). Something (hopefully) helpful should show up in the console. You could understand what happened and what goes wrong more explictly by checking the output.
+Trigger the sync manually (by clicking the icon on the ribbon sidebar). Something (hopefully) helpful should show up in the console. You could understand what happened and what goes wrong more explicitly by checking the output.

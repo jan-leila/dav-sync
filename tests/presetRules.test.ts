@@ -1,18 +1,18 @@
 import { expect } from "chai";
 import type { WebdavConfig } from "../src/baseTypes";
-import { applyWebdavPresetRulesInplace } from "../src/presetRules";
+import { applyWebdavPresetRulesInPlace } from "../src/presetRules";
 
 describe("Preset rules tests", () => {
   it("should check undefined correctly", () => {
     let x: Partial<WebdavConfig> | undefined = undefined;
-    const y = applyWebdavPresetRulesInplace(x);
+    const y = applyWebdavPresetRulesInPlace(x);
     expect(y.webdav === undefined);
     expect(!y.changed);
   });
 
   it("should check empty object", () => {
     let x: Partial<WebdavConfig> | undefined = {};
-    const y = applyWebdavPresetRulesInplace(x);
+    const y = applyWebdavPresetRulesInPlace(x);
     expect(y.webdav).deep.equals({});
     expect(!y.changed);
   });
@@ -22,7 +22,7 @@ describe("Preset rules tests", () => {
       address: "https://example.teracloud.jp/dav/",
       depth: "auto_unknown",
     };
-    let y = applyWebdavPresetRulesInplace(x);
+    let y = applyWebdavPresetRulesInPlace(x);
     expect(x.depth === "auto_1");
     expect(y.changed);
 
@@ -30,7 +30,7 @@ describe("Preset rules tests", () => {
       address: "https://example.teracloud.jp/dav/example",
       depth: "auto_unknown",
     };
-    y = applyWebdavPresetRulesInplace(x);
+    y = applyWebdavPresetRulesInPlace(x);
     expect(x.depth === "auto_1");
     expect(y.changed);
 
@@ -38,7 +38,7 @@ describe("Preset rules tests", () => {
       address: "https://dav.jianguoyun.com/dav/",
       depth: "auto_unknown",
     };
-    y = applyWebdavPresetRulesInplace(x);
+    y = applyWebdavPresetRulesInPlace(x);
     expect(x.depth === "auto_1");
     expect(y.changed);
 
@@ -46,7 +46,7 @@ describe("Preset rules tests", () => {
       address: "https://dav.jianguoyun.com/dav/",
       depth: "auto_infinity",
     };
-    y = applyWebdavPresetRulesInplace(x);
+    y = applyWebdavPresetRulesInPlace(x);
     expect(x.depth === "auto_1");
     expect(y.changed);
   });
@@ -56,7 +56,7 @@ describe("Preset rules tests", () => {
       address: "https://dav.jianguoyun.com/dav/",
       depth: "auto_1",
     };
-    let y = applyWebdavPresetRulesInplace(x);
+    let y = applyWebdavPresetRulesInPlace(x);
     expect(x.depth === "auto_1");
     expect(!y.changed);
   });
@@ -66,7 +66,7 @@ describe("Preset rules tests", () => {
       address: "https://example.teracloud.jp/dav/",
       depth: "manual_infinity",
     };
-    let y = applyWebdavPresetRulesInplace(x);
+    let y = applyWebdavPresetRulesInPlace(x);
     expect(x.depth === "manual_infinity");
     expect(!y.changed);
 
@@ -74,7 +74,7 @@ describe("Preset rules tests", () => {
       address: "https://example.teracloud.jp/dav/example",
       depth: "manual_1",
     };
-    y = applyWebdavPresetRulesInplace(x);
+    y = applyWebdavPresetRulesInPlace(x);
     expect(x.depth === "manual_1");
     expect(!y.changed);
   });
@@ -84,28 +84,28 @@ describe("Preset rules tests", () => {
       address: "https://teracloud.jp/dav/",
       depth: "auto_unknown",
     };
-    applyWebdavPresetRulesInplace(x);
+    applyWebdavPresetRulesInPlace(x);
     expect(x.depth === "auto_unknown");
 
     x = {
       address: "https://dav.jianguoyun.com/dav_example",
       depth: "auto_unknown",
     };
-    applyWebdavPresetRulesInplace(x);
+    applyWebdavPresetRulesInPlace(x);
     expect(x.depth === "auto_unknown");
 
     x = {
       address: "",
       depth: "auto_unknown",
     };
-    applyWebdavPresetRulesInplace(x);
+    applyWebdavPresetRulesInPlace(x);
     expect(x.depth === "auto_unknown");
 
     x = {
       address: "https://dav.jianguoyun.com/dav/",
       depth: "what" as any,
     };
-    applyWebdavPresetRulesInplace(x);
+    applyWebdavPresetRulesInPlace(x);
     expect(x.depth === ("what" as any));
   });
 });

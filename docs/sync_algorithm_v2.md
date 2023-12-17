@@ -21,34 +21,34 @@ In short, we collect four timestamps, and respect the max timestamp and its corr
 
 | t1             | t2             | t3             | t4             | local file to do | remote file to do | local del history to do | remote del history to do | equal to sync v2 branch |
 | -------------- | -------------- | -------------- | -------------- | ---------------- | ----------------- | ----------------------- | ------------------------ | ----------------------- |
-| mtime_remote   | mtime_local    | deltime_remote | deltime_local  | del_if_exists    | del_if_exists     | clean                   | upload_local_del_history |                         |
-| mtime_local    | mtime_remote   | deltime_remote | deltime_local  | del_if_exists    | del_if_exists     | clean                   | upload_local_del_history |                         |
-| mtime_remote   | deltime_remote | mtime_local    | deltime_local  | del_if_exists    | del_if_exists     | clean                   | upload_local_del_history |                         |
-| deltime_remote | mtime_remote   | mtime_local    | deltime_local  | del_if_exists    | del_if_exists     | clean                   | upload_local_del_history |                         |
-| mtime_local    | deltime_remote | mtime_remote   | deltime_local  | del_if_exists    | del_if_exists     | clean                   | upload_local_del_history |                         |
-| deltime_remote | mtime_local    | mtime_remote   | deltime_local  | del_if_exists    | del_if_exists     | clean                   | upload_local_del_history | 8                       |
-| mtime_remote   | mtime_local    | deltime_local  | deltime_remote | del_if_exists    | del_if_exists     | clean                   | keep                     |                         |
-| mtime_local    | mtime_remote   | deltime_local  | deltime_remote | del_if_exists    | del_if_exists     | clean                   | keep                     |                         |
-| mtime_remote   | deltime_local  | mtime_local    | deltime_remote | del_if_exists    | del_if_exists     | clean                   | keep                     |                         |
-| deltime_local  | mtime_remote   | mtime_local    | deltime_remote | del_if_exists    | del_if_exists     | clean                   | keep                     |                         |
-| mtime_local    | deltime_local  | mtime_remote   | deltime_remote | del_if_exists    | del_if_exists     | clean                   | keep                     |                         |
-| deltime_local  | mtime_local    | mtime_remote   | deltime_remote | del_if_exists    | del_if_exists     | clean                   | keep                     |                         |
-| mtime_remote   | deltime_remote | deltime_local  | mtime_local    | skip             | upload_local      | clean                   | clean                    |                         |
-| deltime_remote | mtime_remote   | deltime_local  | mtime_local    | skip             | upload_local      | clean                   | clean                    | 10                      |
-| mtime_remote   | deltime_local  | deltime_remote | mtime_local    | skip             | upload_local      | clean                   | clean                    |                         |
-| deltime_local  | mtime_remote   | deltime_remote | mtime_local    | skip             | upload_local      | clean                   | clean                    |                         |
-| deltime_remote | deltime_local  | mtime_remote   | mtime_local    | skip             | upload_local      | clean                   | clean                    | 2;3;4;5;6               |
-| deltime_local  | deltime_remote | mtime_remote   | mtime_local    | skip             | upload_local      | clean                   | clean                    |                         |
-| mtime_local    | deltime_remote | deltime_local  | mtime_remote   | download_remote  | skip              | clean                   | clean                    |                         |
-| deltime_remote | mtime_local    | deltime_local  | mtime_remote   | download_remote  | skip              | clean                   | clean                    | 7;9                     |
-| mtime_local    | deltime_local  | deltime_remote | mtime_remote   | download_remote  | skip              | clean                   | clean                    |                         |
-| deltime_local  | mtime_local    | deltime_remote | mtime_remote   | download_remote  | skip              | clean                   | clean                    |                         |
-| deltime_remote | deltime_local  | mtime_local    | mtime_remote   | download_remote  | skip              | clean                   | clean                    | 1;9                     |
-| deltime_local  | deltime_remote | mtime_local    | mtime_remote   | download_remote  | skip              | clean                   | clean                    |                         |
+| modifiedTimeRemote   | modifiedTimeLocal    | deleteTimeRemote | deleteTimeLocal  | delIfExists    | delIfExists     | clean                   | uploadLocalDelHistory |                         |
+| modifiedTimeLocal    | modifiedTimeRemote   | deleteTimeRemote | deleteTimeLocal  | delIfExists    | delIfExists     | clean                   | uploadLocalDelHistory |                         |
+| modifiedTimeRemote   | deleteTimeRemote | modifiedTimeLocal    | deleteTimeLocal  | delIfExists    | delIfExists     | clean                   | uploadLocalDelHistory |                         |
+| deleteTimeRemote | modifiedTimeRemote   | modifiedTimeLocal    | deleteTimeLocal  | delIfExists    | delIfExists     | clean                   | uploadLocalDelHistory |                         |
+| modifiedTimeLocal    | deleteTimeRemote | modifiedTimeRemote   | deleteTimeLocal  | delIfExists    | delIfExists     | clean                   | uploadLocalDelHistory |                         |
+| deleteTimeRemote | modifiedTimeLocal    | modifiedTimeRemote   | deleteTimeLocal  | delIfExists    | delIfExists     | clean                   | uploadLocalDelHistory | 8                       |
+| modifiedTimeRemote   | modifiedTimeLocal    | deleteTimeLocal  | deleteTimeRemote | delIfExists    | delIfExists     | clean                   | keep                     |                         |
+| modifiedTimeLocal    | modifiedTimeRemote   | deleteTimeLocal  | deleteTimeRemote | delIfExists    | delIfExists     | clean                   | keep                     |                         |
+| modifiedTimeRemote   | deleteTimeLocal  | modifiedTimeLocal    | deleteTimeRemote | delIfExists    | delIfExists     | clean                   | keep                     |                         |
+| deleteTimeLocal  | modifiedTimeRemote   | modifiedTimeLocal    | deleteTimeRemote | delIfExists    | delIfExists     | clean                   | keep                     |                         |
+| modifiedTimeLocal    | deleteTimeLocal  | modifiedTimeRemote   | deleteTimeRemote | delIfExists    | delIfExists     | clean                   | keep                     |                         |
+| deleteTimeLocal  | modifiedTimeLocal    | modifiedTimeRemote   | deleteTimeRemote | delIfExists    | delIfExists     | clean                   | keep                     |                         |
+| modifiedTimeRemote   | deleteTimeRemote | deleteTimeLocal  | modifiedTimeLocal    | skip             | uploadLocal      | clean                   | clean                    |                         |
+| deleteTimeRemote | modifiedTimeRemote   | deleteTimeLocal  | modifiedTimeLocal    | skip             | uploadLocal      | clean                   | clean                    | 10                      |
+| modifiedTimeRemote   | deleteTimeLocal  | deleteTimeRemote | modifiedTimeLocal    | skip             | uploadLocal      | clean                   | clean                    |                         |
+| deleteTimeLocal  | modifiedTimeRemote   | deleteTimeRemote | modifiedTimeLocal    | skip             | uploadLocal      | clean                   | clean                    |                         |
+| deleteTimeRemote | deleteTimeLocal  | modifiedTimeRemote   | modifiedTimeLocal    | skip             | uploadLocal      | clean                   | clean                    | 2;3;4;5;6               |
+| deleteTimeLocal  | deleteTimeRemote | modifiedTimeRemote   | modifiedTimeLocal    | skip             | uploadLocal      | clean                   | clean                    |                         |
+| modifiedTimeLocal    | deleteTimeRemote | deleteTimeLocal  | modifiedTimeRemote   | downloadRemote  | skip              | clean                   | clean                    |                         |
+| deleteTimeRemote | modifiedTimeLocal    | deleteTimeLocal  | modifiedTimeRemote   | downloadRemote  | skip              | clean                   | clean                    | 7;9                     |
+| modifiedTimeLocal    | deleteTimeLocal  | deleteTimeRemote | modifiedTimeRemote   | downloadRemote  | skip              | clean                   | clean                    |                         |
+| deleteTimeLocal  | modifiedTimeLocal    | deleteTimeRemote | modifiedTimeRemote   | downloadRemote  | skip              | clean                   | clean                    |                         |
+| deleteTimeRemote | deleteTimeLocal  | modifiedTimeLocal    | modifiedTimeRemote   | downloadRemote  | skip              | clean                   | clean                    | 1;9                     |
+| deleteTimeLocal  | deleteTimeRemote | modifiedTimeLocal    | modifiedTimeRemote   | downloadRemote  | skip              | clean                   | clean                    |                         |
 
 ### Folders
 
-We actually do not use any folders' metadata. Thus the only relevent info is their names, while the mtime is actually ignorable.
+We actually do not use any folders' metadata. Thus the only relevant info is their names, while the mtime is actually ignorable.
 
 1. Firstly generate all the files' plan. If any files exist, then it's parent folders all should exist. If the should-exist folder doesn't exist locally, the local should create it recursively. If the should-exist folder doesn't exist remotely, the remote should create it recursively.
 2. Then, a folder is deletable, if and only if all the following conditions meet:

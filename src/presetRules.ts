@@ -21,7 +21,7 @@ const RULES = {
   },
 };
 
-export const applyWebdavPresetRulesInplace = (
+export const applyWebdavPresetRulesInPlace = (
   webdav: Partial<WebdavConfig> | undefined
 ) => {
   if (webdav === undefined) {
@@ -52,7 +52,7 @@ export const applyWebdavPresetRulesInplace = (
   };
 };
 
-export const applyPresetRulesInplace = (
+export const applyPresetRulesInPlace = (
   settings: RemotelySavePluginSettings | undefined
 ) => {
   if (settings === undefined) {
@@ -61,7 +61,7 @@ export const applyPresetRulesInplace = (
       settings: settings,
     };
   }
-  const webdavRes = applyWebdavPresetRulesInplace(settings.webdav);
+  const webdavRes = applyWebdavPresetRulesInPlace(settings.webdav);
   return {
     changed: webdavRes.changed,
     settings: settings,

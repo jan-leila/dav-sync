@@ -8,13 +8,13 @@ From and after version 0.3.0, the plugin just upload minimal extra necessary met
 
 Then the plugin doesn't make more-than-necessary assumptions about information on the remote endpoint.
 
-For example, it's possbile for a uses to manually upload a file to s3, and next time the plugin can download that file to the local device.
+For example, it's possible for a uses to manually upload a file to s3, and next time the plugin can download that file to the local device.
 
 And it's also possible to combine another "sync-to-s3" solution (like, another software) on desktops, and this plugin on mobile devices, together.
 
-## Necessarity Of Uploading Extra Metadata
+## Necessarily Of Uploading Extra Metadata
 
-The main issue comes from deletions (and renamings which is actually interpreted as "deletion-then-creation").
+The main issue comes from deletions (and renaming which is actually interpreted as "deletion-then-creation").
 
 If we don't upload any extra info to the remote, there's usually no way for the second device to know what files / folders have been deleted on the first device.
 

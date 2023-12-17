@@ -58,7 +58,7 @@ describe("Encryption tests", () => {
   it("should encrypt text file and get the same result as openssl", async () => {
     const fileContent = (
       await fs.readFileSync(
-        path.join(__dirname, "static_assets", "sometext.txt")
+        path.join(__dirname, "static_assets", "some_text.txt")
       )
     ).toString("utf-8");
     const password = "somepassword";
@@ -71,8 +71,8 @@ describe("Encryption tests", () => {
     );
 
     // two command returns same result:
-    // cat ./sometext.txt | openssl enc -p -aes-256-cbc -S 8302F586FAB491EC -pbkdf2 -iter 20000 -base64 -pass pass:somepassword
-    // openssl enc -p -aes-256-cbc -S 8302F586FAB491EC -pbkdf2 -iter 20000 -base64 -pass pass:somepassword -in ./sometext.txt
+    // cat ./some_text.txt | openssl enc -p -aes-256-cbc -S 8302F586FAB491EC -pbkdf2 -iter 20000 -base64 -pass pass:somepassword
+    // openssl enc -p -aes-256-cbc -S 8302F586FAB491EC -pbkdf2 -iter 20000 -base64 -pass pass:somepassword -in ./some_text.txt
     const opensslBase64Res =
       "U2FsdGVkX1+DAvWG+rSR7BPXMnlvSSVGMdjsx7kE1CTH+28P+yAZRdDGgFWMGkMd";
     // we output base32, so we need some transformation

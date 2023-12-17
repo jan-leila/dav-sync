@@ -4,7 +4,7 @@
  */
 
 import { Platform, requireApiVersion } from "obsidian";
-import type { LangType, LangTypeAndAuto } from "./i18n";
+import type { LangTypeAndAuto } from "./i18n";
 
 export const DEFAULT_CONTENT_TYPE = "application/octet-stream";
 
@@ -117,7 +117,7 @@ export interface UriParams {
 export const OAUTH2_FORCE_EXPIRE_MILLISECONDS = 1000 * 60 * 60 * 24 * 80;
 
 type DecisionTypeForFile =
-  | "skipUploading" // special, mtimeLocal === mtimeRemote
+  | "skipUploading" // special, modifiedTimeLocal === modifiedTimeRemote
   | "uploadLocalDelHistToRemote" // "delLocalIfExists && delRemoteIfExists && cleanLocalDelHist && uploadLocalDelHistToRemote"
   | "keepRemoteDelHist" // "delLocalIfExists && delRemoteIfExists && cleanLocalDelHist && keepRemoteDelHist"
   | "uploadLocalToRemote" // "skipLocal && uploadLocalToRemote && cleanLocalDelHist && cleanRemoteDelHist"
@@ -146,10 +146,10 @@ export interface FileOrFolderMixedState {
   key: string;
   existLocal?: boolean;
   existRemote?: boolean;
-  mtimeLocal?: number;
-  mtimeRemote?: number;
-  deltimeLocal?: number;
-  deltimeRemote?: number;
+  modifiedTimeLocal?: number;
+  modifiedTimeRemote?: number;
+  deleteTimeLocal?: number;
+  deleteTimeRemote?: number;
   sizeLocal?: number;
   sizeLocalEnc?: number;
   sizeRemote?: number;
@@ -161,19 +161,19 @@ export interface FileOrFolderMixedState {
   syncDone?: "done";
   remoteEncryptedKey?: string;
 
-  mtimeLocalFmt?: string;
-  mtimeRemoteFmt?: string;
-  deltimeLocalFmt?: string;
-  deltimeRemoteFmt?: string;
+  modifiedTimeLocalFmt?: string;
+  modifiedTimeRemoteFmt?: string;
+  deleteTimeLocalFmt?: string;
+  deleteTimeRemoteFmt?: string;
 }
 
 export const API_VER_STAT_FOLDER = "0.13.27";
-export const API_VER_REQURL = "0.13.26"; // desktop ver 0.13.26, iOS ver 1.1.1
-export const API_VER_REQURL_ANDROID = "0.14.6"; // Android ver 1.2.1
+export const API_VER_REQ_URL = "0.13.26"; // desktop ver 0.13.26, iOS ver 1.1.1
+export const API_VER_REQ_URL_ANDROID = "0.14.6"; // Android ver 1.2.1
 
-export const VALID_REQURL =
-  (!Platform.isAndroidApp && requireApiVersion(API_VER_REQURL)) ||
-  (Platform.isAndroidApp && requireApiVersion(API_VER_REQURL_ANDROID));
+export const VALID_REQ_URL =
+  (!Platform.isAndroidApp && requireApiVersion(API_VER_REQ_URL)) ||
+  (Platform.isAndroidApp && requireApiVersion(API_VER_REQ_URL_ANDROID));
 
 export const DEFAULT_DEBUG_FOLDER = "_debug_remotely_save/";
 export const DEFAULT_SYNC_PLANS_HISTORY_FILE_PREFIX =

@@ -15,7 +15,7 @@ const log2 = origLog.getLogger("rs-default");
 
 const originalFactory = log2.methodFactory;
 
-export const applyLogWriterInplace = function (writer: (...msg: any[]) => any) {
+export const applyLogWriterInPlace = function (writer: (...msg: any[]) => any) {
   log2.methodFactory = function (
     methodName: LogLevelNames,
     logLevel: LogLevelNumbers,
@@ -32,7 +32,7 @@ export const applyLogWriterInplace = function (writer: (...msg: any[]) => any) {
   log2.setLevel(log2.getLevel());
 };
 
-export const restoreLogWritterInplace = () => {
+export const restoreLogWriterInPlace = () => {
   log2.methodFactory = originalFactory;
   log2.setLevel(log2.getLevel());
 };

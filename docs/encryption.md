@@ -2,21 +2,21 @@
 
 If a password is set, the files are encrypted before being sent to the cloud.
 
-The encryption algorithm is delibrately designed to be aligned with openssl format.
+The encryption algorithm is deliberately designed to be aligned with openssl format.
 
 1. The encryption algorithm is implemented using web-crypto.
-2. The file content is encrypted using openssl format. Assuming a file named `sometext.txt`, a password `somepassword`, then the encryption is equivalent to the following command:
+2. The file content is encrypted using openssl format. Assuming a file named `some_text.txt`, a password `somepassword`, then the encryption is equivalent to the following command:
 
    ```bash
    # file content encryption (ignoring file path encryption)
-   openssl enc -p -aes-256-cbc -pbkdf2 -iter 20000 -pass pass:somepassword -in ./sometext.txt -out ./sometext.txt.enc
+   openssl enc -p -aes-256-cbc -pbkdf2 -iter 20000 -pass pass:somepassword -in ./some_text.txt -out ./some_text.txt.enc
 
    # file content decryption (ignoring file path decryption)
-   openssl enc -d -p -aes-256-cbc -pbkdf2 -iter 20000 -pass pass:somepassword -in ./sometext.txt.enc -out ./sometext.txt
+   openssl enc -d -p -aes-256-cbc -pbkdf2 -iter 20000 -pass pass:somepassword -in ./some_text.txt.enc -out ./some_text.txt
    ```
 
 3. The file/directory path strings, are encrypted using openssl in binary mode and then `base64url without padding` is applied.
-   Assuming the file path is `a-folder-文件夹/a-file-文件.md`, then the following commands are equivilent:
+   Assuming the file path is `a-folder-文件夹/a-file-文件.md`, then the following commands are equivalent:
 
    ```bash
    # prepare the functions
@@ -31,4 +31,4 @@ The encryption algorithm is delibrately designed to be aligned with openssl form
    echo -n 'U2FsdGVkX19tNkdFL5rZeHxbe7FL-Pp5mkZJkDNFJWFT6lldZlfa57j0C_cKn0I3PZ9YDvOkyoKqfF6lbn0_yg' | base64url::decode | openssl enc -d -aes-256-cbc -pbkdf2 -iter 20000 -pass pass:mylongpassword
    ```
 
-4. The directory is considered as special "0-byte" object on remote s3. So this meta infomation may be easily guessed if some third party can access the remote bucket.
+4. The directory is considered as special "0-byte" object on remote s3. So this meta information may be easily guessed if some third party can access the remote bucket.

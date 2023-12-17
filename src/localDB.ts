@@ -11,13 +11,13 @@ import { log } from "./moreOnLog";
 
 const DB_VERSION_NUMBER_IN_HISTORY = [20211114, 20220108, 20220326];
 export const DEFAULT_DB_VERSION_NUMBER: number = 20220326;
-export const DEFAULT_DB_NAME = "remotelysavedb";
-export const DEFAULT_TBL_VERSION = "schemaversion";
-export const DEFAULT_TBL_FILE_HISTORY = "filefolderoperationhistory";
-export const DEFAULT_TBL_SYNC_MAPPING = "syncmetadatahistory";
-export const DEFAULT_SYNC_PLANS_HISTORY = "syncplanshistory";
-export const DEFAULT_TBL_VAULT_RANDOM_ID_MAPPING = "vaultrandomidmapping";
-export const DEFAULT_TBL_LOGGER_OUTPUT = "loggeroutput";
+export const DEFAULT_DB_NAME = "remotelySaveDB";
+export const DEFAULT_TBL_VERSION = "schemaVersion";
+export const DEFAULT_TBL_FILE_HISTORY = "fileFolderOperationHistory";
+export const DEFAULT_TBL_SYNC_MAPPING = "syncMetaDataHistory";
+export const DEFAULT_SYNC_PLANS_HISTORY = "syncPlansHistory";
+export const DEFAULT_TBL_VAULT_RANDOM_ID_MAPPING = "vaultRandomIDMapping";
+export const DEFAULT_TBL_LOGGER_OUTPUT = "loggerOutput";
 
 export interface FileFolderHistoryRecord {
   key: string;
@@ -461,7 +461,7 @@ export const upsertSyncMetaMappingDataByVault = async (
   remoteExtraKey: string,
   vaultRandomID: string
 ) => {
-  const aggregratedInfo: SyncMetaMappingRecord = {
+  const aggregatedInfo: SyncMetaMappingRecord = {
     localKey: localKey,
     localMtime: localMTime,
     localSize: localSize,
@@ -475,7 +475,7 @@ export const upsertSyncMetaMappingDataByVault = async (
   };
   await db.syncMappingTbl.setItem(
     `${vaultRandomID}\t${remoteKey}`,
-    aggregratedInfo
+    aggregatedInfo
   );
 };
 

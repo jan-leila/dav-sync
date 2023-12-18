@@ -17,7 +17,6 @@ import {
 } from './baseTypes'
 import { decryptArrayBuffer, encryptArrayBuffer } from './encrypt'
 import {
-	bufferToArrayBuffer,
 	getRandomArrayBuffer,
 	getRandomIntInclusive,
 	mkdirpInVault,

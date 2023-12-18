@@ -10,8 +10,8 @@
     "format": "npx prettier --trailing-comma es5 --write .",
     "clean": "npx rimraf main.js",
     "test": "cross-env TS_NODE_COMPILER_OPTIONS={\\\"module\\\":\\\"commonjs\\\"} mocha -r ts-node/register 'tests/**/*.ts'",
-    "lint": "eslint",
-    "lint-fix": "eslint --fix"
+    "lint": "eslint src/*.ts",
+    "lint-fix": "eslint --fix, src/*.ts"
   },
   "browser": {
     "path": "path-browserify",

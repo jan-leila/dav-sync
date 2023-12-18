@@ -12,7 +12,6 @@ import type {
 	SyncTriggerSourceType,
 	DecisionType,
 	FileOrFolderMixedState,
-	SUPPORTED_SERVICES_TYPE,
 } from './baseTypes'
 import { API_VER_STAT_FOLDER } from './baseTypes'
 import {
@@ -68,7 +67,6 @@ export interface SyncPlanType {
   ts: number;
   tsFmt?: string;
   syncTriggerSource?: SyncTriggerSourceType;
-  remoteType: SUPPORTED_SERVICES_TYPE;
   mixedStates: Record<string, FileOrFolderMixedState>;
 }
 

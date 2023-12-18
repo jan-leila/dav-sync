@@ -9,7 +9,6 @@ import type { TextComponent } from 'obsidian'
 import { createElement, Eye, EyeOff } from 'lucide'
 import {
 	DEFAULT_DEBUG_FOLDER,
-	SUPPORTED_SERVICES_TYPE_WITH_REMOTE_BASE_DIR,
 	VALID_REQ_URL,
 	WebdavAuthType,
 	WebdavDepthType,
@@ -113,17 +112,14 @@ class PasswordModal extends Modal {
 class ChangeRemoteBaseDirModal extends Modal {
 	readonly plugin: RemotelySavePlugin
 	readonly newRemoteBaseDir: string
-	readonly service: SUPPORTED_SERVICES_TYPE_WITH_REMOTE_BASE_DIR
 	constructor(
 		app: App,
 		plugin: RemotelySavePlugin,
 		newRemoteBaseDir: string,
-		service: SUPPORTED_SERVICES_TYPE_WITH_REMOTE_BASE_DIR
 	) {
 		super(app)
 		this.plugin = plugin
 		this.newRemoteBaseDir = newRemoteBaseDir
-		this.service = service
 	}
 
 	onOpen() {
@@ -153,7 +149,7 @@ class ChangeRemoteBaseDirModal extends Modal {
 					)
 					button.onClick(async () => {
 						// in the settings, the value is reset to the special case ""
-						this.plugin.settings[this.service].remoteBaseDir = ''
+						this.plugin.settings.webdav.remoteBaseDir = ''
 						await this.plugin.saveSettings()
 						new Notice(t('modal_remote_base_dir_notice'))
 						this.close()
@@ -181,7 +177,7 @@ class ChangeRemoteBaseDirModal extends Modal {
 				.addButton((button) => {
 					button.setButtonText(t('modal_remote_base_dir_second_confirm_change'))
 					button.onClick(async () => {
-						this.plugin.settings[this.service].remoteBaseDir =
+						this.plugin.settings.webdav.remoteBaseDir =
               this.newRemoteBaseDir
 						await this.plugin.saveSettings()
 						new Notice(t('modal_remote_base_dir_notice'))
@@ -371,7 +367,7 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
 		// below for webdav
 		//////////////////////////////////////////////////
 
-		const webdavDiv = containerEl.createEl('div', { cls: 'webdav-hide' })
+		const webdavDiv = containerEl.createEl('div')
 
 		webdavDiv.createEl('h2', { text: t('settings_webdav') })
 
@@ -549,7 +545,6 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
 						this.app,
 						this.plugin,
 						newWebdavRemoteBaseDir,
-						'webdav'
 					).open()
 				})
 			})

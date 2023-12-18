@@ -18,7 +18,7 @@ import { log } from './moreOnLog'
 
 const turnSyncPlanToTable = (record: string) => {
 	const syncPlan: SyncPlanType = JSON.parse(record)
-	const { ts, tsFmt, remoteType } = syncPlan
+	const { ts, tsFmt } = syncPlan
 
 	type allowedHeadersType = keyof FileOrFolderMixedState;
 	const headers: allowedHeadersType[] = [
@@ -42,7 +42,6 @@ const turnSyncPlanToTable = (record: string) => {
 
 	const lines = [
 		`ts: ${ts}${tsFmt !== undefined ? ' / ' + tsFmt : ''}`,
-		`remoteType: ${remoteType}`,
 		`| ${headers.join(' | ')} |`,
 		`| ${headers.map(() => '---').join(' | ')} |`,
 	]

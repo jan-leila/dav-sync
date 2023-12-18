@@ -8,11 +8,6 @@ import type { LangTypeAndAuto } from './i18n'
 
 export const DEFAULT_CONTENT_TYPE = 'application/octet-stream'
 
-export type SUPPORTED_SERVICES_TYPE = 'webdav'
-
-export type SUPPORTED_SERVICES_TYPE_WITH_REMOTE_BASE_DIR =
-  | 'webdav';
-
 export type WebdavAuthType = 'digest' | 'basic';
 export type WebdavDepthType =
   | 'auto_unknown'

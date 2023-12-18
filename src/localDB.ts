@@ -3,7 +3,7 @@ export type LocalForage = typeof localforage;
 import { nanoid } from 'nanoid'
 import { requireApiVersion, TAbstractFile, TFile, TFolder } from 'obsidian'
 
-import { API_VER_STAT_FOLDER, SUPPORTED_SERVICES_TYPE } from './baseTypes'
+import { API_VER_STAT_FOLDER } from './baseTypes'
 import type { SyncPlanType } from './sync'
 import { statFix, toText, unixTimeToStr } from './misc'
 
@@ -38,14 +38,12 @@ interface SyncMetaMappingRecord {
   localMtime: number;
   remoteMtime: number;
   remoteExtraKey: string;
-  remoteType: SUPPORTED_SERVICES_TYPE;
   keyType: 'folder' | 'file';
   vaultRandomID: string;
 }
 
 interface SyncPlanRecord {
   ts: number;
-  remoteType: string;
   syncPlan: string;
   vaultRandomID: string;
 }
@@ -466,7 +464,6 @@ export const upsertSyncMetaMappingDataByVault = async (
 		remoteMtime: remoteMTime,
 		remoteSize: remoteSize,
 		remoteExtraKey: remoteExtraKey,
-		remoteType: serviceType,
 		keyType: localKey.endsWith('/') ? 'folder' : 'file',
 		vaultRandomID: vaultRandomID,
 	}
@@ -495,8 +492,7 @@ export const getSyncMetaMappingByRemoteKeyAndVault = async (
 	if (
 		potentialItem.remoteKey === remoteKey &&
     potentialItem.remoteMtime === remoteMTime &&
-    potentialItem.remoteExtraKey === remoteExtraKey &&
-    potentialItem.remoteType === serviceType
+    potentialItem.remoteExtraKey === remoteExtraKey
 	) {
 		// the result was found
 		return potentialItem
@@ -518,7 +514,6 @@ export const insertSyncPlanRecordByVault = async (
 		ts: syncPlan.ts,
 		tsFmt: syncPlan.tsFmt,
 		vaultRandomID: vaultRandomID,
-		remoteType: syncPlan.remoteType,
 		syncPlan: JSON.stringify(syncPlan /* directly stringify */, null, 2),
 	} as SyncPlanRecord
 	await db.syncPlansTbl.setItem(`${vaultRandomID}\t${syncPlan.ts}`, record)

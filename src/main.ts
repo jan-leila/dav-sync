@@ -16,8 +16,6 @@ import type {
 } from './baseTypes'
 import {
 	COMMAND_CALLBACK,
-	COMMAND_CALLBACK_ONEDRIVE,
-	COMMAND_CALLBACK_DROPBOX,
 	COMMAND_URI,
 } from './baseTypes'
 import { importQrCodeUri } from './importExport'
@@ -33,18 +31,6 @@ import {
 	clearExpiredSyncPlanRecords,
 } from './localDB'
 import { RemoteClient } from './remote'
-import {
-	DEFAULT_DROPBOX_CONFIG,
-	sendAuthReq as sendAuthReqDropbox,
-	setConfigBySuccessfulAuthInPlace as setConfigBySuccessfulAuthInPlaceDropbox,
-} from './remoteForDropbox'
-import {
-	AccessCodeResponseSuccessfulType,
-	DEFAULT_ONEDRIVE_CONFIG,
-	sendAuthReq as sendAuthReqOnedrive,
-	setConfigBySuccessfulAuthInPlace as setConfigBySuccessfulAuthInPlaceOnedrive,
-} from './remoteForOnedrive'
-import { DEFAULT_S3_CONFIG } from './remoteForS3'
 import { DEFAULT_WEBDAV_CONFIG } from './remoteForWebdav'
 import { RemotelySaveSettingTab } from './settings'
 import { fetchMetadataFile, parseRemoteItems, SyncStatusType } from './sync'
@@ -66,12 +52,8 @@ import {
 import { SizesConflictModal } from './syncSizesConflictNotice'
 
 const DEFAULT_SETTINGS: RemotelySavePluginSettings = {
-	s3: DEFAULT_S3_CONFIG,
 	webdav: DEFAULT_WEBDAV_CONFIG,
-	dropbox: DEFAULT_DROPBOX_CONFIG,
-	onedrive: DEFAULT_ONEDRIVE_CONFIG,
 	password: '',
-	serviceType: 's3',
 	currLogLevel: 'info',
 	autoRunEveryMilliseconds: -1,
 	initRunAfterMilliseconds: -1,
@@ -192,7 +174,6 @@ export default class RemotelySavePlugin extends Plugin {
 			getNotice(
 				t('sync_step_1', {
 					maxSteps: `${MAX_STEPS}`,
-					serviceType: this.settings.serviceType,
 				})
 			)
 			this.syncStatus = 'preparing'
@@ -204,11 +185,7 @@ export default class RemotelySavePlugin extends Plugin {
 			)
 			this.syncStatus = 'getting_remote_files_list'
 			const client = new RemoteClient(
-				this.settings.serviceType,
-				this.settings.s3,
 				this.settings.webdav,
-				this.settings.dropbox,
-				this.settings.onedrive,
 				this.app.vault.getName(),
 				() => this.saveSettings()
 			)
@@ -239,7 +216,6 @@ export default class RemotelySavePlugin extends Plugin {
 				remoteRsp.Contents,
 				this.db,
 				this.vaultRandomID,
-				client.serviceType,
 				this.settings.password
 			)
 			const origMetadataOnRemote = await fetchMetadataFile(
@@ -281,7 +257,6 @@ export default class RemotelySavePlugin extends Plugin {
 				localConfigDirContents,
 				origMetadataOnRemote.deletions,
 				localHistory,
-				client.serviceType,
 				triggerSource,
 				this.app.vault,
 				this.settings.syncConfigDir,
@@ -417,8 +392,6 @@ export default class RemotelySavePlugin extends Plugin {
 			log.setLevel(this.settings.currLogLevel as any)
 		}
 
-		await this.checkIfOauthExpires()
-
 		// MUST before prepareDB()
 		// And, it's also possible to be an empty string,
 		// which means the vaultRandomID is read from db later!
@@ -495,163 +468,6 @@ export default class RemotelySavePlugin extends Plugin {
 						params: JSON.stringify(inputParams),
 					})
 				)
-			}
-		)
-
-		this.registerObsidianProtocolHandler(
-			COMMAND_CALLBACK_DROPBOX,
-			async (inputParams) => {
-				if (inputParams.code !== undefined) {
-					if (this.oauth2Info.helperModal !== undefined) {
-						this.oauth2Info.helperModal.contentEl.empty()
-
-						t('protocol_dropbox_connecting')
-							.split('\n')
-							.forEach((val) => {
-								this.oauth2Info.helperModal.contentEl.createEl('p', {
-									text: val,
-								})
-							})
-					}
-
-					const authRes = await sendAuthReqDropbox(
-						this.settings.dropbox.clientID,
-						this.oauth2Info.verifier,
-						inputParams.code
-					)
-
-					setConfigBySuccessfulAuthInPlaceDropbox(
-						this.settings.dropbox,
-						authRes,
-						() => this.saveSettings()
-					)
-
-					const client = new RemoteClient(
-						'dropbox',
-						undefined,
-						undefined,
-						this.settings.dropbox,
-						undefined,
-						this.app.vault.getName(),
-						() => this.saveSettings()
-					)
-
-					const username = await client.getUser()
-					this.settings.dropbox.username = username
-					await this.saveSettings()
-
-					new Notice(
-						t('protocol_dropbox_connect_success', {
-							username: username,
-						})
-					)
-
-					this.oauth2Info.verifier = '' // reset it
-					this.oauth2Info.helperModal?.close() // close it
-					this.oauth2Info.helperModal = undefined
-
-					this.oauth2Info.authDiv?.toggleClass(
-						'dropbox-auth-button-hide',
-						this.settings.dropbox.username !== ''
-					)
-					this.oauth2Info.authDiv = undefined
-
-					this.oauth2Info.revokeAuthSetting?.setDesc(
-						t('protocol_dropbox_connect_success_revoke', {
-							username: this.settings.dropbox.username,
-						})
-					)
-					this.oauth2Info.revokeAuthSetting = undefined
-					this.oauth2Info.revokeDiv?.toggleClass(
-						'dropbox-revoke-auth-button-hide',
-						this.settings.dropbox.username === ''
-					)
-					this.oauth2Info.revokeDiv = undefined
-				} else {
-					new Notice(t('protocol_dropbox_connect_fail'))
-					throw Error(
-						t('protocol_dropbox_connect_unknown', {
-							params: JSON.stringify(inputParams),
-						})
-					)
-				}
-			}
-		)
-
-		this.registerObsidianProtocolHandler(
-			COMMAND_CALLBACK_ONEDRIVE,
-			async (inputParams) => {
-				if (inputParams.code !== undefined) {
-					if (this.oauth2Info.helperModal !== undefined) {
-						this.oauth2Info.helperModal.contentEl.empty()
-
-						t('protocol_onedrive_connecting')
-							.split('\n')
-							.forEach((val) => {
-								this.oauth2Info.helperModal.contentEl.createEl('p', {
-									text: val,
-								})
-							})
-					}
-
-					const rsp = await sendAuthReqOnedrive(
-						this.settings.onedrive.clientID,
-						this.settings.onedrive.authority,
-						inputParams.code,
-						this.oauth2Info.verifier
-					)
-
-					if ((rsp as any).error !== undefined) {
-						throw Error(`${JSON.stringify(rsp)}`)
-					}
-
-					setConfigBySuccessfulAuthInPlaceOnedrive(
-						this.settings.onedrive,
-            rsp as AccessCodeResponseSuccessfulType,
-            () => this.saveSettings()
-					)
-
-					const client = new RemoteClient(
-						'onedrive',
-						undefined,
-						undefined,
-						undefined,
-						this.settings.onedrive,
-						this.app.vault.getName(),
-						() => this.saveSettings()
-					)
-					this.settings.onedrive.username = await client.getUser()
-					await this.saveSettings()
-
-					this.oauth2Info.verifier = '' // reset it
-					this.oauth2Info.helperModal?.close() // close it
-					this.oauth2Info.helperModal = undefined
-
-					this.oauth2Info.authDiv?.toggleClass(
-						'onedrive-auth-button-hide',
-						this.settings.onedrive.username !== ''
-					)
-					this.oauth2Info.authDiv = undefined
-
-					this.oauth2Info.revokeAuthSetting?.setDesc(
-						t('protocol_onedrive_connect_success_revoke', {
-							username: this.settings.onedrive.username,
-						})
-					)
-					this.oauth2Info.revokeAuthSetting = undefined
-					this.oauth2Info.revokeDiv?.toggleClass(
-						'onedrive-revoke-auth-button-hide',
-						this.settings.onedrive.username === ''
-					)
-					this.oauth2Info.revokeDiv = undefined
-				} else {
-					new Notice(t('protocol_onedrive_connect_fail'))
-					throw Error(
-						t('protocol_onedrive_connect_unknown', {
-							params: JSON.stringify(inputParams),
-						})
-					)
-				}
 			}
 		)
 
@@ -753,21 +569,6 @@ export default class RemotelySavePlugin extends Plugin {
 			cloneDeep(DEFAULT_SETTINGS),
 			messyConfigToNormal(await this.loadData())
 		)
-		if (this.settings.dropbox.clientID === '') {
-			this.settings.dropbox.clientID = DEFAULT_SETTINGS.dropbox.clientID
-		}
-		if (this.settings.dropbox.remoteBaseDir === undefined) {
-			this.settings.dropbox.remoteBaseDir = ''
-		}
-		if (this.settings.onedrive.clientID === '') {
-			this.settings.onedrive.clientID = DEFAULT_SETTINGS.onedrive.clientID
-		}
-		if (this.settings.onedrive.authority === '') {
-			this.settings.onedrive.authority = DEFAULT_SETTINGS.onedrive.authority
-		}
-		if (this.settings.onedrive.remoteBaseDir === undefined) {
-			this.settings.onedrive.remoteBaseDir = ''
-		}
 		if (this.settings.webdav.manualRecursive === undefined) {
 			this.settings.webdav.manualRecursive = false
 		}
@@ -776,12 +577,6 @@ export default class RemotelySavePlugin extends Plugin {
 		}
 		if (this.settings.webdav.remoteBaseDir === undefined) {
 			this.settings.webdav.remoteBaseDir = ''
-		}
-		if (this.settings.s3.partsConcurrency === undefined) {
-			this.settings.s3.partsConcurrency = 20
-		}
-		if (this.settings.s3.forcePathStyle === undefined) {
-			this.settings.s3.forcePathStyle = false
 		}
 	}
 
@@ -794,76 +589,6 @@ export default class RemotelySavePlugin extends Plugin {
 
 	async saveSettings() {
 		await this.saveData(normalConfigToMessy(this.settings))
-	}
-
-	async checkIfOauthExpires() {
-		let needSave: boolean = false
-		const current = Date.now()
-
-		// full fill old version settings
-		if (
-			this.settings.dropbox.refreshToken !== '' &&
-      this.settings.dropbox.credentialsShouldBeDeletedAtTime === undefined
-		) {
-			// It has a refreshToken, but not expire time.
-			// Likely to be a setting from old version.
-			// we set it to a month.
-			this.settings.dropbox.credentialsShouldBeDeletedAtTime =
-        current + 1000 * 60 * 60 * 24 * 30
-			needSave = true
-		}
-		if (
-			this.settings.onedrive.refreshToken !== '' &&
-      this.settings.onedrive.credentialsShouldBeDeletedAtTime === undefined
-		) {
-			this.settings.onedrive.credentialsShouldBeDeletedAtTime =
-        current + 1000 * 60 * 60 * 24 * 30
-			needSave = true
-		}
-
-		// check expired or not
-		let dropboxExpired = false
-		if (
-			this.settings.dropbox.refreshToken !== '' &&
-      current >= this.settings.dropbox.credentialsShouldBeDeletedAtTime
-		) {
-			dropboxExpired = true
-			this.settings.dropbox = cloneDeep(DEFAULT_DROPBOX_CONFIG)
-			needSave = true
-		}
-
-		let onedriveExpired = false
-		if (
-			this.settings.onedrive.refreshToken !== '' &&
-      current >= this.settings.onedrive.credentialsShouldBeDeletedAtTime
-		) {
-			onedriveExpired = true
-			this.settings.onedrive = cloneDeep(DEFAULT_ONEDRIVE_CONFIG)
-			needSave = true
-		}
-
-		// save back
-		if (needSave) {
-			await this.saveSettings()
-		}
-
-		// send notice
-		if (dropboxExpired && onedriveExpired) {
-			new Notice(
-				`${this.manifest.name}: You haven't manually auth Dropbox and OneDrive for a while, you need to re-auth them again.`,
-				6000
-			)
-		} else if (dropboxExpired) {
-			new Notice(
-				`${this.manifest.name}: You haven't manually auth Dropbox for a while, you need to re-auth it again.`,
-				6000
-			)
-		} else if (onedriveExpired) {
-			new Notice(
-				`${this.manifest.name}: You haven't manually auth OneDrive for a while, you need to re-auth it again.`,
-				6000
-			)
-		}
 	}
 
 	async getVaultRandomIDFromOldConfigFile() {

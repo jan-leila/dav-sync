@@ -8,20 +8,10 @@ chai.use(chaiAsPromised)
 const expect = chai.expect
 
 const DEFAULT_SETTINGS: RemotelySavePluginSettings = {
-	s3: {
-		s3AccessKeyID: 'acc',
-	} as any,
 	webdav: {
 		address: 'addr',
 	} as any,
-	dropbox: {
-		username: '测试中文',
-	} as any,
-	onedrive: {
-		username: 'test 🍎 emoji',
-	} as any,
 	password: 'password',
-	serviceType: 's3',
 	currLogLevel: 'info',
 }
 

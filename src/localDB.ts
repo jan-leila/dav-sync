@@ -448,7 +448,6 @@ export const insertRenameRecordByVault = async (
 }
 
 export const upsertSyncMetaMappingDataByVault = async (
-	serviceType: SUPPORTED_SERVICES_TYPE,
 	db: InternalDBs,
 	localKey: string,
 	localMTime: number,
@@ -478,7 +477,6 @@ export const upsertSyncMetaMappingDataByVault = async (
 }
 
 export const getSyncMetaMappingByRemoteKeyAndVault = async (
-	serviceType: SUPPORTED_SERVICES_TYPE,
 	db: InternalDBs,
 	remoteKey: string,
 	remoteMTime: number,

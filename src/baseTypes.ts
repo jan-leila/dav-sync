@@ -8,35 +8,10 @@ import type { LangTypeAndAuto } from './i18n'
 
 export const DEFAULT_CONTENT_TYPE = 'application/octet-stream'
 
-export type SUPPORTED_SERVICES_TYPE = 's3' | 'webdav' | 'dropbox' | 'onedrive';
+export type SUPPORTED_SERVICES_TYPE = 'webdav'
 
 export type SUPPORTED_SERVICES_TYPE_WITH_REMOTE_BASE_DIR =
-  | 'webdav'
-  | 'dropbox'
-  | 'onedrive';
-
-export interface S3Config {
-  s3Endpoint: string;
-  s3Region: string;
-  s3AccessKeyID: string;
-  s3SecretAccessKey: string;
-  s3BucketName: string;
-  bypassCorsLocally?: boolean;
-  partsConcurrency?: number;
-  forcePathStyle?: boolean;
-}
-
-export interface DropboxConfig {
-  accessToken: string;
-  clientID: string;
-  refreshToken: string;
-  accessTokenExpiresInSeconds: number;
-  accessTokenExpiresAtTime: number;
-  accountID: string;
-  username: string;
-  credentialsShouldBeDeletedAtTime?: number;
-  remoteBaseDir?: string;
-}
+  | 'webdav';
 
 export type WebdavAuthType = 'digest' | 'basic';
 export type WebdavDepthType =
@@ -70,12 +45,8 @@ export interface OnedriveConfig {
 }
 
 export interface RemotelySavePluginSettings {
-  s3: S3Config;
   webdav: WebdavConfig;
-  dropbox: DropboxConfig;
-  onedrive: OnedriveConfig;
   password: string;
-  serviceType: SUPPORTED_SERVICES_TYPE;
   currLogLevel?: string;
   autoRunEveryMilliseconds?: number;
   initRunAfterMilliseconds?: number;
@@ -97,14 +68,11 @@ export interface RemoteItem {
   key: string;
   lastModified: number;
   size: number;
-  remoteType: SUPPORTED_SERVICES_TYPE;
   etag?: string;
 }
 
 export const COMMAND_URI = 'remotely-save'
 export const COMMAND_CALLBACK = 'remotely-save-cb'
-export const COMMAND_CALLBACK_ONEDRIVE = 'remotely-save-cb-onedrive'
-export const COMMAND_CALLBACK_DROPBOX = 'remotely-save-cb-dropbox'
 
 export interface UriParams {
   func?: string;
